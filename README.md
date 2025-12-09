@@ -1,5 +1,5 @@
 # Perbana
-Proyek aplikasi untuk peringatan bencana. Data diambil dari API Data Terbuka BMKG.
+Proyek aplikasi untuk peringatan bencana. Data diambil dari API [Data Terbuka BMKG](https://data.bmkg.go.id/).
 
 ## Fitur:
 1. Prakiraan Cuaca
