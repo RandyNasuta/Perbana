@@ -8,3 +8,5 @@ Proyek aplikasi untuk peringatan bencana. Data diambil dari API [Data Terbuka BM
 
 ## Sumber Data
 [Data Terbuka BMKG](https://data.bmkg.go.id/)
+
+[Kode Wilayah Indonesia](https://kodewilayah.id/)

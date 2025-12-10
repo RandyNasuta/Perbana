@@ -15,8 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.perbana.adapter.MainMenuAdapter;
+import com.example.perbana.adapter.WeatherAdapter;
 import com.example.perbana.api.response.GempaResponse;
 import com.example.perbana.model.MainMenu;
+import com.example.perbana.model.Weather;
 import com.example.perbana.repository.GempaRepository;
 
 import java.util.ArrayList;
@@ -30,7 +32,12 @@ public class MainActivity extends AppCompatActivity {
 
     private GempaRepository gempaRepository;
 
+    // Variabel
+    private WeatherAdapter weatherAdapter = null;
+    private MainMenuAdapter mainMenuAdapter = null;
+
     //View
+    private RecyclerView rvMainWeather;
     private RecyclerView rvMainMenu;
 
     @Override
@@ -46,6 +53,45 @@ public class MainActivity extends AppCompatActivity {
 
         initView();
 
+        //Recycler View Weather
+        ArrayList<Weather> weathers = new ArrayList<>();
+        weathers.add(new Weather(
+                "24\u2103",
+                "Hujan Ringan",
+                R.drawable.hujan_ringan,
+                "02.00"
+        ));
+        weathers.add(new Weather(
+                "24\u2103",
+                "Berawan",
+                R.drawable.berawan,
+                "05.00"
+        ));
+        weathers.add(new Weather(
+                "28\u2103",
+                "Cerah Berawan",
+                R.drawable.cerah_berawan,
+                "08.00"
+        ));
+        weathers.add(new Weather(
+                "30\u2103",
+                "Cerah Berawan",
+                R.drawable.cerah_berawan,
+                "11.00"
+        ));
+        weathers.add(new Weather(
+                "29\u2103",
+                "Cerah Berawan",
+                R.drawable.cerah_berawan,
+                "14.00"
+        ));
+
+        weatherAdapter = new WeatherAdapter(weathers);
+        rvMainWeather.setAdapter(weatherAdapter);
+
+        rvMainWeather.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
+        //Recycler View Menu
         ArrayList<MainMenu> menus = new ArrayList<>();
         menus.add(new MainMenu(
                 R.drawable.cloudy,
@@ -60,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                 R.string.data_gempa_bumi
         ));
 
-        MainMenuAdapter mainMenuAdapter = new MainMenuAdapter(menus);
+        mainMenuAdapter = new MainMenuAdapter(menus);
         rvMainMenu.setAdapter(mainMenuAdapter);
 
         // Atur ukuran item
@@ -97,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        rvMainWeather = findViewById(R.id.rvMainWeather);
         rvMainMenu = findViewById(R.id.rvMainMenu);
     }
 }
