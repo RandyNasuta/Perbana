@@ -1,9 +1,8 @@
 package com.example.perbana;
 
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -11,12 +10,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.example.perbana.model.Gempa;
-import com.example.perbana.model.GempaResponse;
-import com.example.perbana.model.Infogempa;
-import com.example.perbana.repository.InfoGempaRepository;
+import com.example.perbana.adapter.MainMenuAdapter;
+import com.example.perbana.api.response.GempaResponse;
+import com.example.perbana.model.MainMenu;
+import com.example.perbana.repository.GempaRepository;
+
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -25,11 +28,10 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
     private final String TAG ="MainActivity";
 
-    private InfoGempaRepository infoGempaRepository;
+    private GempaRepository gempaRepository;
 
     //View
-    private TextView tvMain;
-    private ImageView ivMain;
+    private RecyclerView rvMainMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,18 +46,45 @@ public class MainActivity extends AppCompatActivity {
 
         initView();
 
-        infoGempaRepository = new InfoGempaRepository();
+        ArrayList<MainMenu> menus = new ArrayList<>();
+        menus.add(new MainMenu(
+                R.drawable.cloudy,
+                R.string.data_prakiraan_cuaca
+        ));
+        menus.add(new MainMenu(
+                R.drawable.thunder,
+                R.string.peringatan_dini_cuaca
+        ));
+        menus.add(new MainMenu(
+                R.drawable.earthquake,
+                R.string.data_gempa_bumi
+        ));
 
-        infoGempaRepository.getInfoGempa(new Callback<GempaResponse>() {
+        MainMenuAdapter mainMenuAdapter = new MainMenuAdapter(menus);
+        rvMainMenu.setAdapter(mainMenuAdapter);
+
+        // Atur ukuran item
+        int itemWidth = getResources().getDimensionPixelSize(R.dimen.item_width);
+
+        // Set lebay layar
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int screenWidth = displayMetrics.widthPixels;
+
+        // Hitung span count
+        int spanCount = screenWidth / itemWidth;
+        if (spanCount < 1) {
+            spanCount = 1;
+        }
+
+        rvMainMenu.setLayoutManager(new GridLayoutManager(this, spanCount, LinearLayoutManager.VERTICAL, false));
+
+        gempaRepository = new GempaRepository();
+
+        gempaRepository.getInfoGempa(new Callback<GempaResponse>() {
             @Override
             public void onResponse(Call<GempaResponse> call, Response<GempaResponse> response) {
                 if (response.isSuccessful()) {
                     Log.i(TAG, "onResponse: info gempa: " + response.body().toString());
-                    tvMain.setText(response.body().toString());
-
-                    Glide.with(MainActivity.this)
-                            .load("https://static.bmkg.go.id/" + response.body().getInfogempa().getGempa().getShakemap())
-                            .into(ivMain);
                 }
             }
 
@@ -68,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        tvMain = findViewById(R.id.tvMain);
-        ivMain = findViewById(R.id.ivMain);
+        rvMainMenu = findViewById(R.id.rvMainMenu);
     }
 }

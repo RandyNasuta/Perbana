@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardMainMenu"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
+        app:cardCornerRadius="15dp"
+        app:cardElevation="5dp"
+        app:cardPreventCornerOverlap="false"
+        app:cardUseCompatPadding="true">
+
+        <LinearLayout
+            android:id="@+id/llMainMenu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/ivMainMenu"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:src="@drawable/cloudy"/>
+
+            <TextView
+                android:id="@+id/tvMainMenu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Data Perkiraan Cuaca"
+                android:textColor="@color/black"
+                android:textSize="10sp"
+                android:textAlignment="center"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

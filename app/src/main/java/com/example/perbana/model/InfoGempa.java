@@ -2,7 +2,7 @@ package com.example.perbana.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Infogempa {
+public class InfoGempa {
     @SerializedName("gempa")
     private Gempa gempa;
 
@@ -16,7 +16,7 @@ public class Infogempa {
 
     @Override
     public String toString() {
-        return "Infogempa{" +
+        return "InfoGempa{" +
                 "gempa=" + gempa +
                 '}';
     }

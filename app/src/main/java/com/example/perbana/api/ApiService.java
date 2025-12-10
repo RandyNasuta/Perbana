@@ -1,7 +1,6 @@
-package com.example.perbana.network;
+package com.example.perbana.api;
 
-import com.example.perbana.model.GempaResponse;
-import com.example.perbana.model.Infogempa;
+import com.example.perbana.api.response.GempaResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

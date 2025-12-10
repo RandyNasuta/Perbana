@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Perbana</string>
     <string name="data_gempa_terbaru">Data Gempa Terbaru</string>
+    <string name="data_prakiraan_cuaca">Data Prakiraan Cuaca</string>
+    <string name="data_gempa_bumi">Data Gempa Bumi</string>
+    <string name="peringatan_dini_cuaca">Peringatan Dini Cuaca</string>
 </resources>

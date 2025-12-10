@@ -1,4 +1,4 @@
-package com.example.perbana.network;
+package com.example.perbana.api;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
