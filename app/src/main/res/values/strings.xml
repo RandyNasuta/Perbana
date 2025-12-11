@@ -4,4 +4,6 @@
     <string name="data_prakiraan_cuaca">Data Prakiraan Cuaca</string>
     <string name="data_gempa_bumi">Data Gempa Bumi</string>
     <string name="peringatan_dini_cuaca">Peringatan Dini Cuaca</string>
+    <string name="warning_image">Warning image</string>
+    <string name="warning_title">Judul Peringatan Lorem Ipsum</string>
 </resources>
