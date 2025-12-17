@@ -1,11 +1,19 @@
 package com.example.perbana;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -18,10 +26,17 @@ import com.example.perbana.adapter.MainMenuAdapter;
 import com.example.perbana.adapter.WeatherAdapter;
 import com.example.perbana.api.response.GempaResponse;
 import com.example.perbana.model.MainMenu;
+import com.example.perbana.model.RegionCode;
 import com.example.perbana.model.Weather;
 import com.example.perbana.repository.GempaRepository;
+import com.example.perbana.util.CsvReader;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,10 +50,14 @@ public class MainActivity extends AppCompatActivity {
     // Variabel
     private WeatherAdapter weatherAdapter = null;
     private MainMenuAdapter mainMenuAdapter = null;
+    private AlertDialog.Builder dialog = null;
+    private ArrayList<RegionCode> regionCodeList = new ArrayList<>();
+    private CsvReader csvReader = null;
 
     //View
     private RecyclerView rvMainWeather;
     private RecyclerView rvMainMenu;
+    private TextView tvLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,44 +70,17 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Untuk membaca data kode wilayah
+        csvReader = new CsvReader(getResources().openRawResource(R.raw.kode_wilayah));
+        for (String[] data : csvReader.read()) {
+            regionCodeList.add(new RegionCode(data[0], data[1]));
+        }
+
         initView();
 
         //Recycler View Weather
-        ArrayList<Weather> weathers = new ArrayList<>();
-        weathers.add(new Weather(
-                "24\u2103",
-                "Hujan Ringan",
-                R.drawable.hujan_ringan,
-                "02.00"
-        ));
-        weathers.add(new Weather(
-                "24\u2103",
-                "Berawan",
-                R.drawable.berawan,
-                "05.00"
-        ));
-        weathers.add(new Weather(
-                "28\u2103",
-                "Cerah Berawan",
-                R.drawable.cerah_berawan,
-                "08.00"
-        ));
-        weathers.add(new Weather(
-                "30\u2103",
-                "Cerah Berawan",
-                R.drawable.cerah_berawan,
-                "11.00"
-        ));
-        weathers.add(new Weather(
-                "29\u2103",
-                "Cerah Berawan",
-                R.drawable.cerah_berawan,
-                "14.00"
-        ));
-
-        weatherAdapter = new WeatherAdapter(weathers);
+        weatherAdapter = new WeatherAdapter(new ArrayList<Weather>());
         rvMainWeather.setAdapter(weatherAdapter);
-
         rvMainWeather.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         //Recycler View Menu
@@ -140,10 +132,84 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+
+        tvLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog = new MaterialAlertDialogBuilder(MainActivity.this);
+                LayoutInflater inflater = getLayoutInflater();
+                View dialogView = inflater.inflate(R.layout.dialog_choose_region, null);
+                dialog.setView(dialogView);
+                dialog.setCancelable(true);
+                dialog.setTitle("Pilih daerah");
+
+                ArrayList<RegionCode> provinceRegionList = new ArrayList<>();
+                ArrayList<RegionCode> regencyRegionList = new ArrayList<>();
+                ArrayList<RegionCode> subDistrictRegionList = new ArrayList<>();
+                ArrayList<RegionCode> villageRegionList = new ArrayList<>();
+
+                for (RegionCode data : regionCodeList) {
+                    if ((data.getCode().length() - data.getCode().replace(".", "").length()) == 0) {
+                        provinceRegionList.add(data);
+                    } else if ((data.getCode().length() - data.getCode().replace(".", "").length()) == 1) {
+                        regencyRegionList.add(data);
+                    } else if ((data.getCode().length() - data.getCode().replace(".", "").length()) == 2) {
+                       subDistrictRegionList.add(data);
+                    } else if ((data.getCode().length() - data.getCode().replace(".", "").length()) == 3) {
+                        villageRegionList.add(data);
+                    }
+                }
+
+                ArrayAdapter provinceAdapter = new ArrayAdapter(MainActivity.this, R.layout.item_region, provinceRegionList);
+                AutoCompleteTextView autoProvince = dialogView.findViewById(R.id.autoProvince);
+                autoProvince.setAdapter(provinceAdapter);
+
+                autoProvince.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+                });
+
+                ArrayAdapter regencyAdapter = new ArrayAdapter(MainActivity.this, R.layout.item_region, regencyRegionList);
+                AutoCompleteTextView autoRegency = dialogView.findViewById(R.id.autoRegency);
+                autoRegency.setAdapter(regencyAdapter);
+
+                ArrayAdapter subDistrictAdapter = new ArrayAdapter(MainActivity.this, R.layout.item_region, subDistrictRegionList);
+                AutoCompleteTextView autoSubdistrict = dialogView.findViewById(R.id.autoSubdistrict);
+                autoSubdistrict.setAdapter(subDistrictAdapter);
+
+                ArrayAdapter villageAdapter = new ArrayAdapter(MainActivity.this, R.layout.item_region, villageRegionList);
+                AutoCompleteTextView autoVillage = dialogView.findViewById(R.id.autoVillage);
+                autoVillage.setAdapter(villageAdapter);
+
+                dialog.setPositiveButton("Pilih", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+
+                dialog.setNegativeButton("Batal", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+
+                dialog.show();
+            }
+        });
     }
 
     private void initView() {
         rvMainWeather = findViewById(R.id.rvMainWeather);
         rvMainMenu = findViewById(R.id.rvMainMenu);
+        tvLocation = findViewById(R.id.tvLocation);
     }
 }
