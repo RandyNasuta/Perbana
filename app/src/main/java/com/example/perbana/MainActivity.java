@@ -31,6 +31,7 @@ import com.example.perbana.model.Weather;
 import com.example.perbana.repository.GempaRepository;
 import com.example.perbana.util.CsvReader;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,13 +52,28 @@ public class MainActivity extends AppCompatActivity {
     private WeatherAdapter weatherAdapter = null;
     private MainMenuAdapter mainMenuAdapter = null;
     private AlertDialog.Builder dialog = null;
-    private ArrayList<RegionCode> regionCodeList = new ArrayList<>();
+    private final ArrayList<RegionCode> regionCodeList = new ArrayList<>();
     private CsvReader csvReader = null;
+
+    //List untuk menampung data kode daerah;
+    private ArrayList<RegionCode> provinceRegionList = null;
+    private ArrayList<RegionCode> regencyRegionList = null;
+    private ArrayList<RegionCode> subDistrictRegionList = null;
+    private ArrayList<RegionCode> villageRegionList = null;
+    private String choosenRegion = "";
 
     //View
     private RecyclerView rvMainWeather;
     private RecyclerView rvMainMenu;
     private TextView tvLocation;
+    private AutoCompleteTextView autoProvince = null;
+    private AutoCompleteTextView autoRegency = null;
+    private AutoCompleteTextView autoSubdistrict = null;
+    private AutoCompleteTextView autoVillage = null;
+    private TextInputLayout tilProvince = null;
+    private TextInputLayout tilRegency = null;
+    private TextInputLayout tilSubdistrict = null;
+    private TextInputLayout tilVilage = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,50 +159,107 @@ public class MainActivity extends AppCompatActivity {
                 dialog.setCancelable(true);
                 dialog.setTitle("Pilih daerah");
 
-                ArrayList<RegionCode> provinceRegionList = new ArrayList<>();
-                ArrayList<RegionCode> regencyRegionList = new ArrayList<>();
-                ArrayList<RegionCode> subDistrictRegionList = new ArrayList<>();
-                ArrayList<RegionCode> villageRegionList = new ArrayList<>();
+                autoProvince = dialogView.findViewById(R.id.autoProvince);
+                autoRegency = dialogView.findViewById(R.id.autoRegency);
+                autoSubdistrict = dialogView.findViewById(R.id.autoSubdistrict);
+                autoVillage = dialogView.findViewById(R.id.autoVillage);
+
+                tilProvince = dialogView.findViewById(R.id.tilProvince);
+                tilRegency = dialogView.findViewById(R.id.tilRegency);
+                tilSubdistrict = dialogView.findViewById(R.id.tilSubdistrict);
+                tilVilage = dialogView.findViewById(R.id.tilVilage);
+
+                provinceRegionList = new ArrayList<>();
+                regencyRegionList = new ArrayList<>();
+                subDistrictRegionList = new ArrayList<>();
+                villageRegionList = new ArrayList<>();
 
                 for (RegionCode data : regionCodeList) {
                     if ((data.getCode().length() - data.getCode().replace(".", "").length()) == 0) {
                         provinceRegionList.add(data);
-                    } else if ((data.getCode().length() - data.getCode().replace(".", "").length()) == 1) {
-                        regencyRegionList.add(data);
-                    } else if ((data.getCode().length() - data.getCode().replace(".", "").length()) == 2) {
-                       subDistrictRegionList.add(data);
-                    } else if ((data.getCode().length() - data.getCode().replace(".", "").length()) == 3) {
-                        villageRegionList.add(data);
                     }
                 }
 
-                ArrayAdapter provinceAdapter = new ArrayAdapter(MainActivity.this, R.layout.item_region, provinceRegionList);
-                AutoCompleteTextView autoProvince = dialogView.findViewById(R.id.autoProvince);
+                ArrayAdapter<RegionCode> provinceAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.item_region, provinceRegionList);
                 autoProvince.setAdapter(provinceAdapter);
 
-                autoProvince.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                autoProvince.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
-                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        autoRegency.setText("Kabupaten/Kota");
+                        autoRegency.clearListSelection();
+                        autoRegency.dismissDropDown();
+                        tilRegency.setVisibility(View.VISIBLE);
 
+                        tilSubdistrict.setVisibility(View.GONE); //Reset ke gone
+                        tilVilage.setVisibility(View.GONE);
+
+                        regencyRegionList.clear();
+                        subDistrictRegionList.clear();
+                        villageRegionList.clear();
+
+                        for (RegionCode data : regionCodeList) {
+                            if (((data.getCode().length() - data.getCode().replace(".", "").length()) == 1) && (data.getCode().contains(provinceRegionList.get(i).getCode()))) {
+                                regencyRegionList.add(data);
+                            }
+                        }
+
+                        ArrayAdapter<RegionCode> regencyAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.item_region, regencyRegionList);
+                        autoRegency.setAdapter(regencyAdapter);
                     }
-
+                });
+                
+                autoRegency.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
-                    public void onNothingSelected(AdapterView<?> adapterView) {
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        autoSubdistrict.setText("Kecamatan");
+                        autoSubdistrict.clearListSelection();
+                        autoSubdistrict.dismissDropDown();
+                        tilSubdistrict.setVisibility(View.VISIBLE);
 
+                        tilVilage.setVisibility(View.GONE); //Reset ke gone
+
+                        subDistrictRegionList.clear();
+                        villageRegionList.clear();
+
+                        for (RegionCode data : regionCodeList) {
+                            if (((data.getCode().length() - data.getCode().replace(".", "").length()) == 2) && (data.getCode().contains(regencyRegionList.get(i).getCode()))) {
+                                subDistrictRegionList.add(data);
+                            }
+                        }
+
+                        ArrayAdapter<RegionCode> subDistrictAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.item_region, subDistrictRegionList);
+                        autoSubdistrict.setAdapter(subDistrictAdapter);
                     }
                 });
 
-                ArrayAdapter regencyAdapter = new ArrayAdapter(MainActivity.this, R.layout.item_region, regencyRegionList);
-                AutoCompleteTextView autoRegency = dialogView.findViewById(R.id.autoRegency);
-                autoRegency.setAdapter(regencyAdapter);
+                autoSubdistrict.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        autoVillage.setText("Desa/Kelurahan");
+                        autoVillage.clearListSelection();
+                        autoVillage.dismissDropDown();
+                        tilVilage.setVisibility(View.VISIBLE);
 
-                ArrayAdapter subDistrictAdapter = new ArrayAdapter(MainActivity.this, R.layout.item_region, subDistrictRegionList);
-                AutoCompleteTextView autoSubdistrict = dialogView.findViewById(R.id.autoSubdistrict);
-                autoSubdistrict.setAdapter(subDistrictAdapter);
+                        villageRegionList.clear();
 
-                ArrayAdapter villageAdapter = new ArrayAdapter(MainActivity.this, R.layout.item_region, villageRegionList);
-                AutoCompleteTextView autoVillage = dialogView.findViewById(R.id.autoVillage);
-                autoVillage.setAdapter(villageAdapter);
+                        for (RegionCode data : regionCodeList) {
+                            if (((data.getCode().length() - data.getCode().replace(".", "").length()) == 3) && (data.getCode().contains(subDistrictRegionList.get(i).getCode()))) {
+                                villageRegionList.add(data);
+                            }
+                        }
+
+                        ArrayAdapter<RegionCode> villageAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.item_region, villageRegionList);
+                        autoVillage.setAdapter(villageAdapter);
+                    }
+                });
+
+                autoVillage.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        choosenRegion = villageRegionList.get(i).getCode();
+                    }
+                });
 
                 dialog.setPositiveButton("Pilih", new DialogInterface.OnClickListener() {
                     @Override
