@@ -1,13 +1,12 @@
 package com.example.perbana.api;
 
-import com.example.perbana.api.response.GempaResponse;
+import com.google.gson.JsonObject;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Query;
 
 public interface ApiService {
-
-    //Ambil data gempa bumi terbaru
-    @GET("DataMKG/TEWS/autogempa.json")
-    Call<GempaResponse> getInfoGempa();
+    @GET("prakiraan-cuaca")
+    Call<JsonObject> getWeatherPrediction(@Query("adm4") String regionCode);
 }

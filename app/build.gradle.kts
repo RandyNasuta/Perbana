@@ -57,6 +57,7 @@ dependencies {
 
     //Glide
     implementation(libs.glide)
+    implementation(libs.glide.vector)
 
     //Lottie
     implementation(libs.lottie)

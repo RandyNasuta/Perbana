@@ -8,11 +8,11 @@ public class Weather {
     @SerializedName("weather_desc")
     private String weatherDesc;
     @SerializedName("image")
-    private int image;
+    private String image;
     @SerializedName("local_datetime")
     private String localDateTime;
 
-    public Weather(String temperatur, String weatherDesc, int image, String localDateTime) {
+    public Weather(String temperatur, String weatherDesc, String image, String localDateTime) {
         this.temperatur = temperatur;
         this.weatherDesc = weatherDesc;
         this.image = image;
@@ -35,11 +35,11 @@ public class Weather {
         this.weatherDesc = weatherDesc;
     }
 
-    public int getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(int image) {
+    public void setImage(String image) {
         this.image = image;
     }
 

@@ -1,6 +1,11 @@
 package com.example.perbana;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.content.DialogInterface;
+import android.graphics.drawable.PictureDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -9,8 +14,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
@@ -22,22 +28,28 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.perbana.adapter.MainMenuAdapter;
 import com.example.perbana.adapter.WeatherAdapter;
-import com.example.perbana.api.response.GempaResponse;
 import com.example.perbana.model.MainMenu;
 import com.example.perbana.model.RegionCode;
 import com.example.perbana.model.Weather;
 import com.example.perbana.repository.GempaRepository;
+import com.example.perbana.repository.WeatherPredictionRepository;
 import com.example.perbana.util.CsvReader;
+import com.example.perbana.util.DateUtil;
+import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou;
+import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYouListener;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -46,7 +58,9 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
     private final String TAG ="MainActivity";
 
+    // Repository
     private GempaRepository gempaRepository;
+    private WeatherPredictionRepository weatherPredictionRepository;
 
     // Variabel
     private WeatherAdapter weatherAdapter = null;
@@ -74,6 +88,12 @@ public class MainActivity extends AppCompatActivity {
     private TextInputLayout tilRegency = null;
     private TextInputLayout tilSubdistrict = null;
     private TextInputLayout tilVilage = null;
+    private ProgressBar pbMain = null;
+    private ImageView ivCurrentWeather = null;
+    private MaterialCardView cardWeatherList = null;
+    private TextView tvMainCurrentPlace;
+    private TextView tvMainCurrentWeather;
+    private TextView tvMainCurrentTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,11 +113,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
         initView();
+        initRepository();
 
         //Recycler View Weather
         weatherAdapter = new WeatherAdapter(new ArrayList<Weather>());
         rvMainWeather.setAdapter(weatherAdapter);
         rvMainWeather.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
+        if (weatherAdapter.getItemCount() != 0) {
+            rvMainWeather.setVisibility(VISIBLE);
+            cardWeatherList.setVisibility(GONE);
+        } else {
+            rvMainWeather.setVisibility(GONE);
+            cardWeatherList.setVisibility(VISIBLE);
+        }
 
         //Recycler View Menu
         ArrayList<MainMenu> menus = new ArrayList<>();
@@ -131,23 +160,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         rvMainMenu.setLayoutManager(new GridLayoutManager(this, spanCount, LinearLayoutManager.VERTICAL, false));
-
-        gempaRepository = new GempaRepository();
-
-        gempaRepository.getInfoGempa(new Callback<GempaResponse>() {
-            @Override
-            public void onResponse(Call<GempaResponse> call, Response<GempaResponse> response) {
-                if (response.isSuccessful()) {
-                    Log.i(TAG, "onResponse: info gempa: " + response.body().toString());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<GempaResponse> call, Throwable t) {
-                Log.e(TAG, "onFailure: error karena " + t.getMessage());
-                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
 
         tvLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,10 +201,10 @@ public class MainActivity extends AppCompatActivity {
                         autoRegency.setText("Kabupaten/Kota");
                         autoRegency.clearListSelection();
                         autoRegency.dismissDropDown();
-                        tilRegency.setVisibility(View.VISIBLE);
+                        tilRegency.setVisibility(VISIBLE);
 
-                        tilSubdistrict.setVisibility(View.GONE); //Reset ke gone
-                        tilVilage.setVisibility(View.GONE);
+                        tilSubdistrict.setVisibility(GONE); //Reset ke gone
+                        tilVilage.setVisibility(GONE);
 
                         regencyRegionList.clear();
                         subDistrictRegionList.clear();
@@ -215,9 +227,9 @@ public class MainActivity extends AppCompatActivity {
                         autoSubdistrict.setText("Kecamatan");
                         autoSubdistrict.clearListSelection();
                         autoSubdistrict.dismissDropDown();
-                        tilSubdistrict.setVisibility(View.VISIBLE);
+                        tilSubdistrict.setVisibility(VISIBLE);
 
-                        tilVilage.setVisibility(View.GONE); //Reset ke gone
+                        tilVilage.setVisibility(GONE); //Reset ke gone
 
                         subDistrictRegionList.clear();
                         villageRegionList.clear();
@@ -239,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
                         autoVillage.setText("Desa/Kelurahan");
                         autoVillage.clearListSelection();
                         autoVillage.dismissDropDown();
-                        tilVilage.setVisibility(View.VISIBLE);
+                        tilVilage.setVisibility(VISIBLE);
 
                         villageRegionList.clear();
 
@@ -265,6 +277,89 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
 
+                        //Tampilkan progress bar
+                        pbMain.setVisibility(VISIBLE);
+
+                        //Ambil data dari API
+                        weatherPredictionRepository.getWeatherPrediction(choosenRegion, new Callback<JsonObject>() {
+                            @Override
+                            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    JsonObject body = response.body();
+                                    JsonObject data = body.getAsJsonArray("data").get(0).getAsJsonObject();
+
+                                    JsonObject lokasi = data.getAsJsonObject("lokasi");
+
+                                    //Cuaca saat ini
+                                    JsonArray cuaca = data.getAsJsonArray("cuaca").get(0).getAsJsonArray();
+                                    JsonObject cuacaCurrent = cuaca.get(0).getAsJsonObject();
+
+                                    //Data untuk informasi cuaca sekarang
+                                    tvLocation.setText(lokasi.get("provinsi").getAsString() + ", " + lokasi.get("kotkab").getAsString() + ", " + lokasi.get("kecamatan").getAsString() + ", " + lokasi.get("desa").getAsString());
+                                    tvMainCurrentPlace.setText(cuacaCurrent.get("t").getAsString() + "℃");
+                                    tvMainCurrentWeather.setText(lokasi.get("desa").getAsString() + " (" + cuacaCurrent.get("weather_desc").getAsString() + ")");
+                                    tvMainCurrentTime.setText(DateUtil.parseDate("yyyy-MM-dd HH:mm:ss", "dd MMMM yyyy (HH:mm)", cuacaCurrent.get("local_datetime").getAsString()));
+
+                                    RequestBuilder<PictureDrawable> requestBuilder = GlideToVectorYou
+                                            .init()
+                                            .with(MainActivity.this)
+                                            .withListener(new GlideToVectorYouListener() {
+                                                @Override
+                                                public void onLoadFailed() {
+                                                    Log.e(TAG, "onLoadFailed: Gagal load gambar cuaca");
+                                                }
+
+                                                @Override
+                                                public void onResourceReady() {
+                                                    Log.i(TAG, "onResourceReady: Berhasil load gambar cuaca");
+                                                }
+                                            })
+                                            .setPlaceHolder(R.drawable.missing_image, R.drawable.missing_image)
+                                            .getRequestBuilder();
+
+                                    requestBuilder
+                                            .load(Uri.parse(cuacaCurrent.get("image").getAsString()))
+                                            .transition(DrawableTransitionOptions.withCrossFade())
+                                            .apply(new RequestOptions()
+                                                    .centerCrop())
+                                            .into(ivCurrentWeather);
+                                    
+                                    JsonArray cuacaArray = data.getAsJsonArray("cuaca");
+
+                                    ArrayList<Weather> weathers = new ArrayList<>();
+                                    for (JsonElement jsonElement : cuacaArray) {
+                                        JsonArray innerCuaca = jsonElement.getAsJsonArray();
+                                        for (JsonElement jsonElement1 : innerCuaca) {
+                                            Weather weather = new Weather(
+                                                    jsonElement1.getAsJsonObject().get("t").getAsString(),
+                                                    jsonElement1.getAsJsonObject().get("weather_desc").getAsString(),
+                                                    jsonElement1.getAsJsonObject().get("image").getAsString(),
+                                                    jsonElement1.getAsJsonObject().get("local_datetime").getAsString()
+                                            );
+                                            weathers.add(weather);
+                                        }
+                                    }
+
+                                    weatherAdapter.updateData(weathers);
+
+                                    if (weatherAdapter.getItemCount() != 0) {
+                                        rvMainWeather.setVisibility(VISIBLE);
+                                        cardWeatherList.setVisibility(GONE);
+                                    } else {
+                                        rvMainWeather.setVisibility(GONE);
+                                        cardWeatherList.setVisibility(VISIBLE);
+                                    }
+                                }
+
+                                //Tutup Progress Bar
+                                pbMain.setVisibility(GONE);
+                            }
+
+                            @Override
+                            public void onFailure(Call<JsonObject> call, Throwable t) {
+
+                            }
+                        });
                     }
                 });
 
@@ -280,9 +375,20 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void initRepository() {
+        gempaRepository = new GempaRepository();
+        weatherPredictionRepository = new WeatherPredictionRepository();
+    }
+
     private void initView() {
         rvMainWeather = findViewById(R.id.rvMainWeather);
         rvMainMenu = findViewById(R.id.rvMainMenu);
         tvLocation = findViewById(R.id.tvLocation);
+        tvMainCurrentPlace = findViewById(R.id.tvMainCurrentPlace);
+        tvMainCurrentWeather = findViewById(R.id.tvMainCurrentWeather);
+        tvMainCurrentTime = findViewById(R.id.tvMainCurrentTime);
+        pbMain = findViewById(R.id.pbMain);
+        ivCurrentWeather = findViewById(R.id.ivCurrentWeather);
+        cardWeatherList = findViewById(R.id.cardWeatherList);
     }
 }
