@@ -1,7 +1,7 @@
-package com.example.perbana.repository;
+package com.example.perbana.db.repository;
 
-import com.example.perbana.api.ApiClient;
-import com.example.perbana.api.ApiService;
+import com.example.perbana.db.network.api.ApiClient;
+import com.example.perbana.db.network.api.ApiService;
 import com.google.gson.JsonObject;
 
 import retrofit2.Callback;

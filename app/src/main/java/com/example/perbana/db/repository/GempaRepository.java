@@ -1,9 +1,7 @@
-package com.example.perbana.repository;
+package com.example.perbana.db.repository;
 
-import com.example.perbana.api.ApiClient;
-import com.example.perbana.api.ApiService;
-
-import retrofit2.Callback;
+import com.example.perbana.db.network.api.ApiClient;
+import com.example.perbana.db.network.api.ApiService;
 
 public class GempaRepository {
     private ApiService apiService;

@@ -1,4 +1,4 @@
-package com.example.perbana.api;
+package com.example.perbana.db.network.api;
 
 import com.google.gson.JsonObject;
 

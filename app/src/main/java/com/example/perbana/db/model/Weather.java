@@ -1,4 +1,4 @@
-package com.example.perbana.model;
+package com.example.perbana.db.model;
 
 import com.google.gson.annotations.SerializedName;
 

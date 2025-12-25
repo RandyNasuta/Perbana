@@ -30,14 +30,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.request.RequestOptions;
-import com.example.perbana.adapter.MainMenuAdapter;
 import com.example.perbana.adapter.WeatherAdapter;
-import com.example.perbana.model.MainMenu;
-import com.example.perbana.model.RegionCode;
-import com.example.perbana.model.Weather;
-import com.example.perbana.repository.GempaRepository;
-import com.example.perbana.repository.WeatherPredictionRepository;
+import com.example.perbana.db.model.RegionCode;
+import com.example.perbana.db.model.Weather;
+import com.example.perbana.db.repository.GempaRepository;
+import com.example.perbana.db.repository.RegionRepository;
+import com.example.perbana.db.repository.WeatherPredictionRepository;
 import com.example.perbana.util.CsvReader;
 import com.example.perbana.util.DateUtil;
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou;
@@ -50,21 +48,22 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private final String TAG ="MainActivity";
 
     // Repository
     private GempaRepository gempaRepository;
     private WeatherPredictionRepository weatherPredictionRepository;
+    private RegionRepository regionRepository;
 
     // Variabel
     private WeatherAdapter weatherAdapter = null;
-    private MainMenuAdapter mainMenuAdapter = null;
     private AlertDialog.Builder dialog = null;
     private final ArrayList<RegionCode> regionCodeList = new ArrayList<>();
     private CsvReader csvReader = null;
@@ -78,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
 
     //View
     private RecyclerView rvMainWeather;
-    private RecyclerView rvMainMenu;
     private TextView tvLocation;
     private AutoCompleteTextView autoProvince = null;
     private AutoCompleteTextView autoRegency = null;
@@ -112,8 +110,110 @@ public class MainActivity extends AppCompatActivity {
             regionCodeList.add(new RegionCode(data[0], data[1]));
         }
 
-        initView();
         initRepository();
+        initView();
+        initLaunched();
+    }
+
+    private void currentChoosenRegion(String choosenRegion) {
+        //Tampilkan progress bar
+        pbMain.setVisibility(VISIBLE);
+
+        //Ambil data dari API
+        weatherPredictionRepository.getWeatherPrediction(choosenRegion, new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    JsonObject body = response.body();
+                    JsonObject data = body.getAsJsonArray("data").get(0).getAsJsonObject();
+
+                    JsonObject lokasi = data.getAsJsonObject("lokasi");
+
+                    //Cuaca saat ini
+                    JsonArray cuaca = data.getAsJsonArray("cuaca").get(0).getAsJsonArray();
+                    JsonObject cuacaCurrent = cuaca.get(0).getAsJsonObject();
+
+                    //Data untuk informasi cuaca sekarang
+                    tvLocation.setText(lokasi.get("provinsi").getAsString() + ", " + lokasi.get("kotkab").getAsString() + ", " + lokasi.get("kecamatan").getAsString() + ", " + lokasi.get("desa").getAsString());
+                    tvMainCurrentPlace.setText(cuacaCurrent.get("t").getAsString() + "℃");
+                    tvMainCurrentWeather.setText(lokasi.get("desa").getAsString() + " (" + cuacaCurrent.get("weather_desc").getAsString() + ")");
+                    tvMainCurrentTime.setText(DateUtil.parseDate("yyyy-MM-dd HH:mm:ss", "dd MMMM yyyy (HH:mm)", cuacaCurrent.get("local_datetime").getAsString()));
+
+                    RequestBuilder<PictureDrawable> requestBuilder = GlideToVectorYou
+                            .init()
+                            .with(MainActivity.this)
+                            .withListener(new GlideToVectorYouListener() {
+                                @Override
+                                public void onLoadFailed() {
+                                    Log.e(TAG, "onLoadFailed: Gagal load gambar cuaca");
+                                }
+
+                                @Override
+                                public void onResourceReady() {
+                                    Log.i(TAG, "onResourceReady: Berhasil load gambar cuaca");
+                                }
+                            })
+                            .setPlaceHolder(R.drawable.missing_image, R.drawable.missing_image)
+                            .getRequestBuilder();
+
+                    requestBuilder
+                            .load(Uri.parse(cuacaCurrent.get("image").getAsString()))
+                            .transition(DrawableTransitionOptions.withCrossFade())
+                            .into(ivCurrentWeather);
+
+                    JsonArray cuacaArray = data.getAsJsonArray("cuaca");
+
+                    ArrayList<Weather> weathers = new ArrayList<>();
+                    for (JsonElement jsonElement : cuacaArray) {
+                        JsonArray innerCuaca = jsonElement.getAsJsonArray();
+                        for (JsonElement jsonElement1 : innerCuaca) {
+                            Weather weather = new Weather(
+                                    jsonElement1.getAsJsonObject().get("t").getAsString(),
+                                    jsonElement1.getAsJsonObject().get("weather_desc").getAsString(),
+                                    jsonElement1.getAsJsonObject().get("image").getAsString(),
+                                    jsonElement1.getAsJsonObject().get("local_datetime").getAsString()
+                            );
+                            weathers.add(weather);
+                        }
+                    }
+
+                    weatherAdapter.updateData(weathers);
+
+                    if (weatherAdapter.getItemCount() != 0) {
+                        rvMainWeather.setVisibility(VISIBLE);
+                        cardWeatherList.setVisibility(GONE);
+                    } else {
+                        rvMainWeather.setVisibility(GONE);
+                        cardWeatherList.setVisibility(VISIBLE);
+                    }
+                }
+
+                //Tutup Progress Bar
+                pbMain.setVisibility(GONE);
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Log.e(TAG, "onFailure: error saat memanggil api kondisi cuaca saat ini: " + t.getMessage());
+            }
+        });
+    }
+
+    private void initRepository() {
+        gempaRepository = new GempaRepository();
+        weatherPredictionRepository = new WeatherPredictionRepository();
+        regionRepository = new RegionRepository(MainActivity.this);
+    }
+
+    private void initView() {
+        rvMainWeather = findViewById(R.id.rvMainWeather);
+        tvLocation = findViewById(R.id.tvLocation);
+        tvMainCurrentPlace = findViewById(R.id.tvMainCurrentPlace);
+        tvMainCurrentWeather = findViewById(R.id.tvMainCurrentWeather);
+        tvMainCurrentTime = findViewById(R.id.tvMainCurrentTime);
+        pbMain = findViewById(R.id.pbMain);
+        ivCurrentWeather = findViewById(R.id.ivCurrentWeather);
+        cardWeatherList = findViewById(R.id.cardWeatherList);
 
         //Recycler View Weather
         weatherAdapter = new WeatherAdapter(new ArrayList<Weather>());
@@ -128,24 +228,6 @@ public class MainActivity extends AppCompatActivity {
             cardWeatherList.setVisibility(VISIBLE);
         }
 
-        //Recycler View Menu
-        ArrayList<MainMenu> menus = new ArrayList<>();
-        menus.add(new MainMenu(
-                R.drawable.cloudy,
-                R.string.data_prakiraan_cuaca
-        ));
-        menus.add(new MainMenu(
-                R.drawable.thunder,
-                R.string.peringatan_dini_cuaca
-        ));
-        menus.add(new MainMenu(
-                R.drawable.earthquake,
-                R.string.data_gempa_bumi
-        ));
-
-        mainMenuAdapter = new MainMenuAdapter(menus);
-        rvMainMenu.setAdapter(mainMenuAdapter);
-
         // Atur ukuran item
         int itemWidth = getResources().getDimensionPixelSize(R.dimen.item_width);
 
@@ -159,236 +241,147 @@ public class MainActivity extends AppCompatActivity {
             spanCount = 1;
         }
 
-        rvMainMenu.setLayoutManager(new GridLayoutManager(this, spanCount, LinearLayoutManager.VERTICAL, false));
+        //Atur fungsi tekan di sini
+        tvLocation.setOnClickListener(this);
+    }
 
-        tvLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog = new MaterialAlertDialogBuilder(MainActivity.this);
-                LayoutInflater inflater = getLayoutInflater();
-                View dialogView = inflater.inflate(R.layout.dialog_choose_region, null);
-                dialog.setView(dialogView);
-                dialog.setCancelable(true);
-                dialog.setTitle("Pilih daerah");
+    private void initLaunched() {
+        //Cek apakah user sudah memilih daerah, jika sudah maka panggil api untuk cek kondisi cuaca saat ini
+        if (!Objects.equals(regionRepository.getKeyRegionCode(), "")) {
+            currentChoosenRegion(regionRepository.getKeyRegionCode());
+        }
+    }
 
-                autoProvince = dialogView.findViewById(R.id.autoProvince);
-                autoRegency = dialogView.findViewById(R.id.autoRegency);
-                autoSubdistrict = dialogView.findViewById(R.id.autoSubdistrict);
-                autoVillage = dialogView.findViewById(R.id.autoVillage);
+    @Override
+    public void onClick(View view) {
+        if (view.getId() == R.id.tvLocation) {
+            dialog = new MaterialAlertDialogBuilder(MainActivity.this);
+            LayoutInflater inflater = getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.dialog_choose_region, null);
+            dialog.setView(dialogView);
+            dialog.setCancelable(true);
+            dialog.setTitle("Pilih daerah");
 
-                tilProvince = dialogView.findViewById(R.id.tilProvince);
-                tilRegency = dialogView.findViewById(R.id.tilRegency);
-                tilSubdistrict = dialogView.findViewById(R.id.tilSubdistrict);
-                tilVilage = dialogView.findViewById(R.id.tilVilage);
+            autoProvince = dialogView.findViewById(R.id.autoProvince);
+            autoRegency = dialogView.findViewById(R.id.autoRegency);
+            autoSubdistrict = dialogView.findViewById(R.id.autoSubdistrict);
+            autoVillage = dialogView.findViewById(R.id.autoVillage);
 
-                provinceRegionList = new ArrayList<>();
-                regencyRegionList = new ArrayList<>();
-                subDistrictRegionList = new ArrayList<>();
-                villageRegionList = new ArrayList<>();
+            tilProvince = dialogView.findViewById(R.id.tilProvince);
+            tilRegency = dialogView.findViewById(R.id.tilRegency);
+            tilSubdistrict = dialogView.findViewById(R.id.tilSubdistrict);
+            tilVilage = dialogView.findViewById(R.id.tilVilage);
 
-                for (RegionCode data : regionCodeList) {
-                    if ((data.getCode().length() - data.getCode().replace(".", "").length()) == 0) {
-                        provinceRegionList.add(data);
-                    }
+            provinceRegionList = new ArrayList<>();
+            regencyRegionList = new ArrayList<>();
+            subDistrictRegionList = new ArrayList<>();
+            villageRegionList = new ArrayList<>();
+
+            for (RegionCode data : regionCodeList) {
+                if ((data.getCode().length() - data.getCode().replace(".", "").length()) == 0) {
+                    provinceRegionList.add(data);
                 }
-
-                ArrayAdapter<RegionCode> provinceAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.item_region, provinceRegionList);
-                autoProvince.setAdapter(provinceAdapter);
-
-                autoProvince.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        autoRegency.setText("Kabupaten/Kota");
-                        autoRegency.clearListSelection();
-                        autoRegency.dismissDropDown();
-                        tilRegency.setVisibility(VISIBLE);
-
-                        tilSubdistrict.setVisibility(GONE); //Reset ke gone
-                        tilVilage.setVisibility(GONE);
-
-                        regencyRegionList.clear();
-                        subDistrictRegionList.clear();
-                        villageRegionList.clear();
-
-                        for (RegionCode data : regionCodeList) {
-                            if (((data.getCode().length() - data.getCode().replace(".", "").length()) == 1) && (data.getCode().contains(provinceRegionList.get(i).getCode()))) {
-                                regencyRegionList.add(data);
-                            }
-                        }
-
-                        ArrayAdapter<RegionCode> regencyAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.item_region, regencyRegionList);
-                        autoRegency.setAdapter(regencyAdapter);
-                    }
-                });
-                
-                autoRegency.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        autoSubdistrict.setText("Kecamatan");
-                        autoSubdistrict.clearListSelection();
-                        autoSubdistrict.dismissDropDown();
-                        tilSubdistrict.setVisibility(VISIBLE);
-
-                        tilVilage.setVisibility(GONE); //Reset ke gone
-
-                        subDistrictRegionList.clear();
-                        villageRegionList.clear();
-
-                        for (RegionCode data : regionCodeList) {
-                            if (((data.getCode().length() - data.getCode().replace(".", "").length()) == 2) && (data.getCode().contains(regencyRegionList.get(i).getCode()))) {
-                                subDistrictRegionList.add(data);
-                            }
-                        }
-
-                        ArrayAdapter<RegionCode> subDistrictAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.item_region, subDistrictRegionList);
-                        autoSubdistrict.setAdapter(subDistrictAdapter);
-                    }
-                });
-
-                autoSubdistrict.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        autoVillage.setText("Desa/Kelurahan");
-                        autoVillage.clearListSelection();
-                        autoVillage.dismissDropDown();
-                        tilVilage.setVisibility(VISIBLE);
-
-                        villageRegionList.clear();
-
-                        for (RegionCode data : regionCodeList) {
-                            if (((data.getCode().length() - data.getCode().replace(".", "").length()) == 3) && (data.getCode().contains(subDistrictRegionList.get(i).getCode()))) {
-                                villageRegionList.add(data);
-                            }
-                        }
-
-                        ArrayAdapter<RegionCode> villageAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.item_region, villageRegionList);
-                        autoVillage.setAdapter(villageAdapter);
-                    }
-                });
-
-                autoVillage.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        choosenRegion = villageRegionList.get(i).getCode();
-                    }
-                });
-
-                dialog.setPositiveButton("Pilih", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                        //Tampilkan progress bar
-                        pbMain.setVisibility(VISIBLE);
-
-                        //Ambil data dari API
-                        weatherPredictionRepository.getWeatherPrediction(choosenRegion, new Callback<JsonObject>() {
-                            @Override
-                            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                                if (response.isSuccessful() && response.body() != null) {
-                                    JsonObject body = response.body();
-                                    JsonObject data = body.getAsJsonArray("data").get(0).getAsJsonObject();
-
-                                    JsonObject lokasi = data.getAsJsonObject("lokasi");
-
-                                    //Cuaca saat ini
-                                    JsonArray cuaca = data.getAsJsonArray("cuaca").get(0).getAsJsonArray();
-                                    JsonObject cuacaCurrent = cuaca.get(0).getAsJsonObject();
-
-                                    //Data untuk informasi cuaca sekarang
-                                    tvLocation.setText(lokasi.get("provinsi").getAsString() + ", " + lokasi.get("kotkab").getAsString() + ", " + lokasi.get("kecamatan").getAsString() + ", " + lokasi.get("desa").getAsString());
-                                    tvMainCurrentPlace.setText(cuacaCurrent.get("t").getAsString() + "℃");
-                                    tvMainCurrentWeather.setText(lokasi.get("desa").getAsString() + " (" + cuacaCurrent.get("weather_desc").getAsString() + ")");
-                                    tvMainCurrentTime.setText(DateUtil.parseDate("yyyy-MM-dd HH:mm:ss", "dd MMMM yyyy (HH:mm)", cuacaCurrent.get("local_datetime").getAsString()));
-
-                                    RequestBuilder<PictureDrawable> requestBuilder = GlideToVectorYou
-                                            .init()
-                                            .with(MainActivity.this)
-                                            .withListener(new GlideToVectorYouListener() {
-                                                @Override
-                                                public void onLoadFailed() {
-                                                    Log.e(TAG, "onLoadFailed: Gagal load gambar cuaca");
-                                                }
-
-                                                @Override
-                                                public void onResourceReady() {
-                                                    Log.i(TAG, "onResourceReady: Berhasil load gambar cuaca");
-                                                }
-                                            })
-                                            .setPlaceHolder(R.drawable.missing_image, R.drawable.missing_image)
-                                            .getRequestBuilder();
-
-                                    requestBuilder
-                                            .load(Uri.parse(cuacaCurrent.get("image").getAsString()))
-                                            .transition(DrawableTransitionOptions.withCrossFade())
-                                            .apply(new RequestOptions()
-                                                    .centerCrop())
-                                            .into(ivCurrentWeather);
-                                    
-                                    JsonArray cuacaArray = data.getAsJsonArray("cuaca");
-
-                                    ArrayList<Weather> weathers = new ArrayList<>();
-                                    for (JsonElement jsonElement : cuacaArray) {
-                                        JsonArray innerCuaca = jsonElement.getAsJsonArray();
-                                        for (JsonElement jsonElement1 : innerCuaca) {
-                                            Weather weather = new Weather(
-                                                    jsonElement1.getAsJsonObject().get("t").getAsString(),
-                                                    jsonElement1.getAsJsonObject().get("weather_desc").getAsString(),
-                                                    jsonElement1.getAsJsonObject().get("image").getAsString(),
-                                                    jsonElement1.getAsJsonObject().get("local_datetime").getAsString()
-                                            );
-                                            weathers.add(weather);
-                                        }
-                                    }
-
-                                    weatherAdapter.updateData(weathers);
-
-                                    if (weatherAdapter.getItemCount() != 0) {
-                                        rvMainWeather.setVisibility(VISIBLE);
-                                        cardWeatherList.setVisibility(GONE);
-                                    } else {
-                                        rvMainWeather.setVisibility(GONE);
-                                        cardWeatherList.setVisibility(VISIBLE);
-                                    }
-                                }
-
-                                //Tutup Progress Bar
-                                pbMain.setVisibility(GONE);
-                            }
-
-                            @Override
-                            public void onFailure(Call<JsonObject> call, Throwable t) {
-
-                            }
-                        });
-                    }
-                });
-
-                dialog.setNegativeButton("Batal", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
-                });
-
-                dialog.show();
             }
-        });
-    }
 
-    private void initRepository() {
-        gempaRepository = new GempaRepository();
-        weatherPredictionRepository = new WeatherPredictionRepository();
-    }
+            ArrayAdapter<RegionCode> provinceAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.item_region, provinceRegionList);
+            autoProvince.setAdapter(provinceAdapter);
 
-    private void initView() {
-        rvMainWeather = findViewById(R.id.rvMainWeather);
-        rvMainMenu = findViewById(R.id.rvMainMenu);
-        tvLocation = findViewById(R.id.tvLocation);
-        tvMainCurrentPlace = findViewById(R.id.tvMainCurrentPlace);
-        tvMainCurrentWeather = findViewById(R.id.tvMainCurrentWeather);
-        tvMainCurrentTime = findViewById(R.id.tvMainCurrentTime);
-        pbMain = findViewById(R.id.pbMain);
-        ivCurrentWeather = findViewById(R.id.ivCurrentWeather);
-        cardWeatherList = findViewById(R.id.cardWeatherList);
+            autoProvince.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    autoRegency.setText("Kabupaten/Kota");
+                    autoRegency.clearListSelection();
+                    autoRegency.dismissDropDown();
+                    tilRegency.setVisibility(VISIBLE);
+
+                    tilSubdistrict.setVisibility(GONE); //Reset ke gone
+                    tilVilage.setVisibility(GONE);
+
+                    regencyRegionList.clear();
+                    subDistrictRegionList.clear();
+                    villageRegionList.clear();
+
+                    for (RegionCode data : regionCodeList) {
+                        if (((data.getCode().length() - data.getCode().replace(".", "").length()) == 1) && (data.getCode().contains(provinceRegionList.get(i).getCode()))) {
+                            regencyRegionList.add(data);
+                        }
+                    }
+
+                    ArrayAdapter<RegionCode> regencyAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.item_region, regencyRegionList);
+                    autoRegency.setAdapter(regencyAdapter);
+                }
+            });
+
+            autoRegency.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    autoSubdistrict.setText("Kecamatan");
+                    autoSubdistrict.clearListSelection();
+                    autoSubdistrict.dismissDropDown();
+                    tilSubdistrict.setVisibility(VISIBLE);
+
+                    tilVilage.setVisibility(GONE); //Reset ke gone
+
+                    subDistrictRegionList.clear();
+                    villageRegionList.clear();
+
+                    for (RegionCode data : regionCodeList) {
+                        if (((data.getCode().length() - data.getCode().replace(".", "").length()) == 2) && (data.getCode().contains(regencyRegionList.get(i).getCode()))) {
+                            subDistrictRegionList.add(data);
+                        }
+                    }
+
+                    ArrayAdapter<RegionCode> subDistrictAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.item_region, subDistrictRegionList);
+                    autoSubdistrict.setAdapter(subDistrictAdapter);
+                }
+            });
+
+            autoSubdistrict.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    autoVillage.setText("Desa/Kelurahan");
+                    autoVillage.clearListSelection();
+                    autoVillage.dismissDropDown();
+                    tilVilage.setVisibility(VISIBLE);
+
+                    villageRegionList.clear();
+
+                    for (RegionCode data : regionCodeList) {
+                        if (((data.getCode().length() - data.getCode().replace(".", "").length()) == 3) && (data.getCode().contains(subDistrictRegionList.get(i).getCode()))) {
+                            villageRegionList.add(data);
+                        }
+                    }
+
+                    ArrayAdapter<RegionCode> villageAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.item_region, villageRegionList);
+                    autoVillage.setAdapter(villageAdapter);
+                }
+            });
+
+            autoVillage.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    choosenRegion = villageRegionList.get(i).getCode();
+                }
+            });
+
+            dialog.setPositiveButton("Pilih", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    //Simpan data daerah terpilih di preferences
+                    regionRepository.setKeyRegionCode(choosenRegion);
+
+                    currentChoosenRegion(choosenRegion);
+                }
+            });
+
+            dialog.setNegativeButton("Batal", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Log.i(TAG, "onClick: Tidak ada daerah yang dipilih");
+                }
+            });
+
+            dialog.show();
+        }
     }
 }

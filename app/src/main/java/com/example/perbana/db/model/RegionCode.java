@@ -1,4 +1,4 @@
-package com.example.perbana.model;
+package com.example.perbana.db.model;
 
 public class RegionCode {
     private String code;
