@@ -4,6 +4,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,19 +18,26 @@ import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.example.perbana.adapter.WeatherAdapter;
 import com.example.perbana.db.model.RegionCode;
 import com.example.perbana.db.model.Weather;
@@ -92,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tvMainCurrentPlace;
     private TextView tvMainCurrentWeather;
     private TextView tvMainCurrentTime;
+    private ImageView ivAutoGempa;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -203,6 +212,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         gempaRepository = new GempaRepository();
         weatherPredictionRepository = new WeatherPredictionRepository();
         regionRepository = new RegionRepository(MainActivity.this);
+
+        gempaRepository.autoGempa(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    JsonObject body = response.body();
+                    JsonObject infoGempa = body.getAsJsonObject("Infogempa");
+                    JsonObject gempa = infoGempa.getAsJsonObject("gempa");
+                    String image = gempa.get("Shakemap").getAsString();
+
+                    Glide.with(MainActivity.this)
+                            .load("https://static.bmkg.go.id/" + image)
+                            .placeholder(R.drawable.missing_image)
+                            .error(R.drawable.missing_image)
+                            .transition(DrawableTransitionOptions.withCrossFade())
+                            .diskCacheStrategy(DiskCacheStrategy.DATA)
+                            .listener(new RequestListener<Drawable>() {
+                                @Override
+                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                    Log.e(TAG, "onLoadFailed: Gagal load gambar auto gempa: " + e.getMessage());
+                                    return false;
+                                }
+
+                                @Override
+                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                    Log.i(TAG, "onResourceReady: Berhasil load gambar auto gempa");
+                                    return false;
+                                }
+                            })
+                            .into(ivAutoGempa);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Terjadi suatu kesalahan: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "onFailure: error saat memanggil api auto gempa: " + t.getMessage());
+            }
+        });
     }
 
     private void initView() {
@@ -214,6 +262,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pbMain = findViewById(R.id.pbMain);
         ivCurrentWeather = findViewById(R.id.ivCurrentWeather);
         cardWeatherList = findViewById(R.id.cardWeatherList);
+
+        ivAutoGempa = findViewById(R.id.ivAutoGempa);
 
         //Recycler View Weather
         weatherAdapter = new WeatherAdapter(new ArrayList<Weather>());

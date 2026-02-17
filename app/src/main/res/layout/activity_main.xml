@@ -12,22 +12,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/main"
-            tools:context=".MainActivity">
+            tools:context=".MainActivity"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:id="@+id/llLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="32dp"
-                app:layout_constraintBottom_toTopOf="@id/cardMainWeather"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:layout_marginTop="32dp">
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -55,11 +52,7 @@
                 app:cardCornerRadius="25dp"
                 app:cardElevation="5dp"
                 app:cardPreventCornerOverlap="false"
-                app:cardUseCompatPadding="true"
-                app:layout_constraintBottom_toTopOf="@id/barierMain1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/llLocation">
+                app:cardUseCompatPadding="true">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -113,24 +106,12 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <androidx.constraintlayout.widget.Barrier
-                android:id="@+id/barierMain1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:barrierDirection="top"
-                app:constraint_referenced_ids="rvMainWeather, cardWeatherList"/>
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvMainWeather"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:nestedScrollingEnabled="false"
-                app:layout_constraintBottom_toTopOf="@+id/barierMain2"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.25"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/barierMain1" />
+                android:nestedScrollingEnabled="false" />
 
 
             <com.google.android.material.card.MaterialCardView
@@ -138,11 +119,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                app:layout_constraintBottom_toTopOf="@+id/barierMain2"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.25"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/barierMain1"
                 android:visibility="gone">
 
                 <LinearLayout
@@ -175,23 +151,38 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-
-            <androidx.constraintlayout.widget.Barrier
-                android:id="@+id/barierMain2"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:barrierDirection="bottom"
-                app:constraint_referenced_ids="rvMainWeather, cardWeatherList"/>
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:paddingHorizontal="4dp"
+                android:layout_marginTop="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Informasi Cuaca"
+                    android:textStyle="bold"
+                    android:layout_weight="1"
+                    android:textColor="@color/black"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Lihat lebih banyak"
+                    android:textStyle="bold"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:textColor="@color/black"/>
+            </LinearLayout>
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardWeatherWarning"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                app:layout_constraintBottom_toTopOf="@id/cardEarthQuakeWarning"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/barierMain2">
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -217,50 +208,57 @@
                         android:textStyle="bold" />
 
                 </LinearLayout>
-
-
             </com.google.android.material.card.MaterialCardView>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:paddingHorizontal="4dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Informasi gempa"
+                    android:textStyle="bold"
+                    android:layout_weight="1"
+                    android:textColor="@color/black"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Lihat lebih banyak"
+                    android:textStyle="bold"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:textColor="@color/black"/>
+            </LinearLayout>
 
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardEarthQuakeWarning"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cardWeatherWarning">
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp">
 
-                <LinearLayout
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="24dp"
-                    tools:ignore="UseCompoundDrawables">
+                    android:layout_height="match_parent">
 
                     <ImageView
-                        android:id="@+id/ivEarthQuakeWarning"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_margin="8dp"
-                        android:src="@drawable/warning"
-                        android:contentDescription="@string/warning_image"/>
-
-                    <TextView
-                        android:id="@+id/tvTitleEarthQuakeWarning"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="8dp"
-                        android:text="@string/warning_title"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
+                        android:id="@+id/ivAutoGempa"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="center"
+                        android:src="@drawable/missing_image"/>
+                </FrameLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/pbMain"
