@@ -227,6 +227,7 @@
                     android:textColor="@color/black"/>
 
                 <TextView
+                    android:id="@+id/tv_more_earthquake"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="Lihat lebih banyak"

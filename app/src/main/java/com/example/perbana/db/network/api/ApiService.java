@@ -12,4 +12,10 @@ public interface ApiService {
 
     @GET("DataMKG/TEWS/autogempa.json")
     Call<JsonObject> getAutoGempa();
+
+    @GET("DataMKG/TEWS/gempaterkini.json")
+    Call<JsonObject> getEarthquakeList();
+
+    @GET("DataMKG/TEWS/gempadirasakan.json")
+    Call<JsonObject> getEarthquakeFeltList();
 }

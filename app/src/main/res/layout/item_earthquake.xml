@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/surface_card"
+    app:cardBackgroundColor="@color/white">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_magnitude_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="[M 5.0]"
+                android:textColor="@color/danger"
+                android:textStyle="bold"
+                android:textSize="@dimen/text_size_h3"/>
+
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp">
+
+                <TextView
+                    android:id="@+id/tv_earthquake_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="205 km Barat dari Jakarta"
+                    android:textColor="@color/primary_text"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/text_size_body_large"/>
+
+                <TextView
+                    android:id="@+id/tv_earthquake_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="09 Agustus 2026 • 10:202 WIB"
+                    android:textColor="@color/text_gray"
+                    android:textSize="@dimen/text_size_body_medium"/>
+            </LinearLayout>
+        </LinearLayout>
+        
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/surface_card"
+            android:layout_marginVertical="12dp"/>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_tsunami_potential"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Potensi: Tidak berpotensi tsunami"
+                android:textColor="@color/accent_blue"
+                android:textStyle="bold"
+                android:textSize="@dimen/text_size_body_medium"/>
+
+
+            <TextView
+                android:id="@+id/tv_earthquake_depth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kedalaman: 10km"
+                android:textColor="@color/text_gray"
+                android:textSize="@dimen/text_size_body_large"/>
+        </LinearLayout>
+    </LinearLayout>
+
+
+</com.google.android.material.card.MaterialCardView>

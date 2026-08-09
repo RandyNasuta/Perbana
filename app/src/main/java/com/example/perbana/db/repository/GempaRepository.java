@@ -16,4 +16,12 @@ public class GempaRepository {
     public void autoGempa(Callback<JsonObject> callback) {
         apiService.getAutoGempa().enqueue(callback);
     }
+
+    public void getEarthquakeList(Callback<JsonObject> callback) {
+        apiService.getEarthquakeList().enqueue(callback);
+    }
+
+    public void getEarthquakeFeltList(Callback<JsonObject> callback) {
+        apiService.getEarthquakeFeltList().enqueue(callback);
+    }
 }

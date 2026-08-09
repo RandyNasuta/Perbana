@@ -4,6 +4,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
 import android.net.Uri;
@@ -44,6 +45,7 @@ import com.example.perbana.db.model.Weather;
 import com.example.perbana.db.repository.GempaRepository;
 import com.example.perbana.db.repository.RegionRepository;
 import com.example.perbana.db.repository.WeatherPredictionRepository;
+import com.example.perbana.presentation.earthquake.earthquake_list.EarthquakeListActivity;
 import com.example.perbana.util.CsvReader;
 import com.example.perbana.util.DateUtil;
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou;
@@ -101,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tvMainCurrentWeather;
     private TextView tvMainCurrentTime;
     private ImageView ivAutoGempa;
+    private TextView tvMoreEarthquake;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -262,8 +265,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pbMain = findViewById(R.id.pbMain);
         ivCurrentWeather = findViewById(R.id.ivCurrentWeather);
         cardWeatherList = findViewById(R.id.cardWeatherList);
-
         ivAutoGempa = findViewById(R.id.ivAutoGempa);
+        tvMoreEarthquake = findViewById(R.id.tv_more_earthquake);
 
         //Recycler View Weather
         weatherAdapter = new WeatherAdapter(new ArrayList<Weather>());
@@ -293,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Atur fungsi tekan di sini
         tvLocation.setOnClickListener(this);
+        tvMoreEarthquake.setOnClickListener(this);
     }
 
     private void initLaunched() {
@@ -432,6 +436,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             });
 
             dialog.show();
+        }
+        else if (view.getId() == R.id.tv_more_earthquake) {
+            Intent intent = new Intent(MainActivity.this, EarthquakeListActivity.class);
+            startActivity(intent);
         }
     }
 }

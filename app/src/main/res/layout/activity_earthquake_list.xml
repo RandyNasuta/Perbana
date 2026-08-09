@@ -31,7 +31,7 @@
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/layout_header_earthquake_list_1"
+                    android:id="@+id/ll_header_earthquake_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -40,7 +40,7 @@
                     android:background="?attr/selectableItemBackground">
 
                     <TextView
-                        android:id="@+id/tv_earthquake_list_1_title"
+                        android:id="@+id/tv_earthquake_list_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -49,16 +49,15 @@
                         android:textStyle="bold" />
 
                     <ImageView
-                        android:id="@+id/iv_arrow_earthquake_list_1"
+                        android:id="@+id/iv_arrow_earthquake_list"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
                         android:src="@drawable/baseline_arrow_downward_24"
                         app:tint="@color/primary_text"/>
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/layout_expandable_earthquake_list_1"
+                    android:id="@+id/layout_expandable_earthquake_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
@@ -70,7 +69,7 @@
                         android:background="?attr/colorOutlineVariant"/>
 
                     <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rv_earthquake_m5"
+                        android:id="@+id/rv_earthquake"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingBottom="8dp"
@@ -94,7 +93,7 @@
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/layout_header_earthquake_list_2"
+                    android:id="@+id/ll_header_earthquake_list_felt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -103,7 +102,7 @@
                     android:background="?attr/selectableItemBackground">
 
                     <TextView
-                        android:id="@+id/tv_earthquake_list_2_title"
+                        android:id="@+id/tv_earthquake_list_felt_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -112,16 +111,15 @@
                         android:textStyle="bold" />
 
                     <ImageView
-                        android:id="@+id/iv_arrow_earthquake_list_2"
+                        android:id="@+id/iv_arrow_earthquake_list_felt"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
                         android:src="@drawable/baseline_arrow_downward_24"
                         app:tint="@color/primary_text"/>
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/layout_expandable_earthquake_list_2"
+                    android:id="@+id/layout_expandable_earthquake_list_felt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
@@ -133,7 +131,7 @@
                         android:background="?attr/colorOutlineVariant"/>
 
                     <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rv_earthquake_latest"
+                        android:id="@+id/rv_earthquake_felt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingBottom="8dp"
