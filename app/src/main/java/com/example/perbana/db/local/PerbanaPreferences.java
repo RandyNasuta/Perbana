@@ -7,9 +7,9 @@ public class PerbanaPreferences {
     private static final String PREFERENCES_NAME = "PerbanaPreferences";
     private static final int PRIVATE_MODE = 0;
 
-    private SharedPreferences pref;
-    private SharedPreferences.Editor editor;
-    private Context context;
+    private final SharedPreferences pref;
+    private final SharedPreferences.Editor editor;
+    private final Context context;
 
     private static final String KEY_REGION_CODE = "";
 

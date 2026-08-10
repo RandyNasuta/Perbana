@@ -7,7 +7,7 @@ import com.google.gson.JsonObject;
 import retrofit2.Callback;
 
 public class WeatherPredictionRepository {
-    private ApiService apiService;
+    private final ApiService apiService;
 
     public WeatherPredictionRepository() {
         this.apiService = ApiClient.getClient(2);

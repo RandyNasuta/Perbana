@@ -9,7 +9,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class AuthInterceptor implements Interceptor {
-    private String token;
+    private final String token;
 
     public AuthInterceptor(String token) {
         this.token = token;

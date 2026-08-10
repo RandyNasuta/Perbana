@@ -40,11 +40,13 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.perbana.adapter.WeatherAdapter;
+import com.example.perbana.db.model.AutoEarthquake;
 import com.example.perbana.db.model.RegionCode;
 import com.example.perbana.db.model.Weather;
 import com.example.perbana.db.repository.GempaRepository;
 import com.example.perbana.db.repository.RegionRepository;
 import com.example.perbana.db.repository.WeatherPredictionRepository;
+import com.example.perbana.presentation.earthquake.earthquake_detail.EarthquakeDetailActivity;
 import com.example.perbana.presentation.earthquake.earthquake_list.EarthquakeListActivity;
 import com.example.perbana.util.CsvReader;
 import com.example.perbana.util.DateUtil;
@@ -64,20 +66,17 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private final String TAG ="MainActivity";
-
+public class MainActivity extends AppCompatActivity {
+    private final String TAG = "MainActivity";
+    private final ArrayList<RegionCode> regionCodeList = new ArrayList<>();
     // Repository
     private GempaRepository gempaRepository;
     private WeatherPredictionRepository weatherPredictionRepository;
     private RegionRepository regionRepository;
-
     // Variabel
     private WeatherAdapter weatherAdapter = null;
     private AlertDialog.Builder dialog = null;
-    private final ArrayList<RegionCode> regionCodeList = new ArrayList<>();
     private CsvReader csvReader = null;
-
     //List untuk menampung data kode daerah;
     private ArrayList<RegionCode> provinceRegionList = null;
     private ArrayList<RegionCode> regencyRegionList = null;
@@ -102,8 +101,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tvMainCurrentPlace;
     private TextView tvMainCurrentWeather;
     private TextView tvMainCurrentTime;
-    private ImageView ivAutoGempa;
     private TextView tvMoreEarthquake;
+    private ImageView ivAutoGempa;
+    private MaterialCardView cardEarthquakeWarning;
+    private TextView tvAutoMagnitude;
+    private TextView tvAutoDate;
+    private TextView tvAutoRegion;
+    private TextView tvAutoDepth;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,190 +130,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initRepository();
         initView();
         initLaunched();
-    }
 
-    private void currentChoosenRegion(String choosenRegion) {
-        //Tampilkan progress bar
-        pbMain.setVisibility(VISIBLE);
-
-        //Ambil data dari API
-        weatherPredictionRepository.getWeatherPrediction(choosenRegion, new Callback<JsonObject>() {
-            @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    JsonObject body = response.body();
-                    JsonObject data = body.getAsJsonArray("data").get(0).getAsJsonObject();
-
-                    JsonObject lokasi = data.getAsJsonObject("lokasi");
-
-                    //Cuaca saat ini
-                    JsonArray cuaca = data.getAsJsonArray("cuaca").get(0).getAsJsonArray();
-                    JsonObject cuacaCurrent = cuaca.get(0).getAsJsonObject();
-
-                    //Data untuk informasi cuaca sekarang
-                    tvLocation.setText(lokasi.get("provinsi").getAsString() + ", " + lokasi.get("kotkab").getAsString() + ", " + lokasi.get("kecamatan").getAsString() + ", " + lokasi.get("desa").getAsString());
-                    tvMainCurrentPlace.setText(cuacaCurrent.get("t").getAsString() + "℃");
-                    tvMainCurrentWeather.setText(lokasi.get("desa").getAsString() + " (" + cuacaCurrent.get("weather_desc").getAsString() + ")");
-                    tvMainCurrentTime.setText(DateUtil.parseDate("yyyy-MM-dd HH:mm:ss", "dd MMMM yyyy (HH:mm)", cuacaCurrent.get("local_datetime").getAsString()));
-
-                    RequestBuilder<PictureDrawable> requestBuilder = GlideToVectorYou
-                            .init()
-                            .with(MainActivity.this)
-                            .withListener(new GlideToVectorYouListener() {
-                                @Override
-                                public void onLoadFailed() {
-                                    Log.e(TAG, "onLoadFailed: Gagal load gambar cuaca");
-                                }
-
-                                @Override
-                                public void onResourceReady() {
-                                    Log.i(TAG, "onResourceReady: Berhasil load gambar cuaca");
-                                }
-                            })
-                            .setPlaceHolder(R.drawable.missing_image, R.drawable.missing_image)
-                            .getRequestBuilder();
-
-                    requestBuilder
-                            .load(Uri.parse(cuacaCurrent.get("image").getAsString()))
-                            .transition(DrawableTransitionOptions.withCrossFade())
-                            .into(ivCurrentWeather);
-
-                    JsonArray cuacaArray = data.getAsJsonArray("cuaca");
-
-                    ArrayList<Weather> weathers = new ArrayList<>();
-                    for (JsonElement jsonElement : cuacaArray) {
-                        JsonArray innerCuaca = jsonElement.getAsJsonArray();
-                        for (JsonElement jsonElement1 : innerCuaca) {
-                            Weather weather = new Weather(
-                                    jsonElement1.getAsJsonObject().get("t").getAsString(),
-                                    jsonElement1.getAsJsonObject().get("weather_desc").getAsString(),
-                                    jsonElement1.getAsJsonObject().get("image").getAsString(),
-                                    jsonElement1.getAsJsonObject().get("local_datetime").getAsString()
-                            );
-                            weathers.add(weather);
-                        }
-                    }
-
-                    weatherAdapter.updateData(weathers);
-
-                    if (weatherAdapter.getItemCount() != 0) {
-                        rvMainWeather.setVisibility(VISIBLE);
-                        cardWeatherList.setVisibility(GONE);
-                    } else {
-                        rvMainWeather.setVisibility(GONE);
-                        cardWeatherList.setVisibility(VISIBLE);
-                    }
-                }
-
-                //Tutup Progress Bar
-                pbMain.setVisibility(GONE);
-            }
-
-            @Override
-            public void onFailure(Call<JsonObject> call, Throwable t) {
-                Log.e(TAG, "onFailure: error saat memanggil api kondisi cuaca saat ini: " + t.getMessage());
-            }
-        });
-    }
-
-    private void initRepository() {
-        gempaRepository = new GempaRepository();
-        weatherPredictionRepository = new WeatherPredictionRepository();
-        regionRepository = new RegionRepository(MainActivity.this);
-
-        gempaRepository.autoGempa(new Callback<JsonObject>() {
-            @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    JsonObject body = response.body();
-                    JsonObject infoGempa = body.getAsJsonObject("Infogempa");
-                    JsonObject gempa = infoGempa.getAsJsonObject("gempa");
-                    String image = gempa.get("Shakemap").getAsString();
-
-                    Glide.with(MainActivity.this)
-                            .load("https://static.bmkg.go.id/" + image)
-                            .placeholder(R.drawable.missing_image)
-                            .error(R.drawable.missing_image)
-                            .transition(DrawableTransitionOptions.withCrossFade())
-                            .diskCacheStrategy(DiskCacheStrategy.DATA)
-                            .listener(new RequestListener<Drawable>() {
-                                @Override
-                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                    Log.e(TAG, "onLoadFailed: Gagal load gambar auto gempa: " + e.getMessage());
-                                    return false;
-                                }
-
-                                @Override
-                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                    Log.i(TAG, "onResourceReady: Berhasil load gambar auto gempa");
-                                    return false;
-                                }
-                            })
-                            .into(ivAutoGempa);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<JsonObject> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Terjadi suatu kesalahan: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "onFailure: error saat memanggil api auto gempa: " + t.getMessage());
-            }
-        });
-    }
-
-    private void initView() {
-        rvMainWeather = findViewById(R.id.rvMainWeather);
-        tvLocation = findViewById(R.id.tvLocation);
-        tvMainCurrentPlace = findViewById(R.id.tvMainCurrentPlace);
-        tvMainCurrentWeather = findViewById(R.id.tvMainCurrentWeather);
-        tvMainCurrentTime = findViewById(R.id.tvMainCurrentTime);
-        pbMain = findViewById(R.id.pbMain);
-        ivCurrentWeather = findViewById(R.id.ivCurrentWeather);
-        cardWeatherList = findViewById(R.id.cardWeatherList);
-        ivAutoGempa = findViewById(R.id.ivAutoGempa);
-        tvMoreEarthquake = findViewById(R.id.tv_more_earthquake);
-
-        //Recycler View Weather
-        weatherAdapter = new WeatherAdapter(new ArrayList<Weather>());
-        rvMainWeather.setAdapter(weatherAdapter);
-        rvMainWeather.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-
-        if (weatherAdapter.getItemCount() != 0) {
-            rvMainWeather.setVisibility(VISIBLE);
-            cardWeatherList.setVisibility(GONE);
-        } else {
-            rvMainWeather.setVisibility(GONE);
-            cardWeatherList.setVisibility(VISIBLE);
-        }
-
-        // Atur ukuran item
-        int itemWidth = getResources().getDimensionPixelSize(R.dimen.item_width);
-
-        // Set lebay layar
-        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-        int screenWidth = displayMetrics.widthPixels;
-
-        // Hitung span count
-        int spanCount = screenWidth / itemWidth;
-        if (spanCount < 1) {
-            spanCount = 1;
-        }
-
-        //Atur fungsi tekan di sini
-        tvLocation.setOnClickListener(this);
-        tvMoreEarthquake.setOnClickListener(this);
-    }
-
-    private void initLaunched() {
-        //Cek apakah user sudah memilih daerah, jika sudah maka panggil api untuk cek kondisi cuaca saat ini
-        if (!Objects.equals(regionRepository.getKeyRegionCode(), "")) {
-            currentChoosenRegion(regionRepository.getKeyRegionCode());
-        }
-    }
-
-    @Override
-    public void onClick(View view) {
-        if (view.getId() == R.id.tvLocation) {
+        tvLocation.setOnClickListener(view -> {
             dialog = new MaterialAlertDialogBuilder(MainActivity.this);
             LayoutInflater inflater = getLayoutInflater();
             View dialogView = inflater.inflate(R.layout.dialog_choose_region, null);
@@ -436,10 +259,224 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             });
 
             dialog.show();
-        }
-        else if (view.getId() == R.id.tv_more_earthquake) {
+        });
+
+        tvMoreEarthquake.setOnClickListener(view -> {
             Intent intent = new Intent(MainActivity.this, EarthquakeListActivity.class);
             startActivity(intent);
+        });
+    }
+
+    private void currentChoosenRegion(String choosenRegion) {
+        //Tampilkan progress bar
+        pbMain.setVisibility(VISIBLE);
+
+        //Ambil data dari API
+        weatherPredictionRepository.getWeatherPrediction(choosenRegion, new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    JsonObject body = response.body();
+                    JsonObject data = body.getAsJsonArray("data").get(0).getAsJsonObject();
+
+                    JsonObject lokasi = data.getAsJsonObject("lokasi");
+
+                    //Cuaca saat ini
+                    JsonArray cuaca = data.getAsJsonArray("cuaca").get(0).getAsJsonArray();
+                    JsonObject cuacaCurrent = cuaca.get(0).getAsJsonObject();
+
+                    //Data untuk informasi cuaca sekarang
+                    tvLocation.setText(lokasi.get("provinsi").getAsString() + ", " + lokasi.get("kotkab").getAsString() + ", " + lokasi.get("kecamatan").getAsString() + ", " + lokasi.get("desa").getAsString());
+                    tvMainCurrentPlace.setText(cuacaCurrent.get("t").getAsString() + "℃");
+                    tvMainCurrentWeather.setText(lokasi.get("desa").getAsString() + " (" + cuacaCurrent.get("weather_desc").getAsString() + ")");
+                    tvMainCurrentTime.setText(DateUtil.parseDate("yyyy-MM-dd HH:mm:ss", "dd MMMM yyyy (HH:mm)", cuacaCurrent.get("local_datetime").getAsString()));
+
+                    RequestBuilder<PictureDrawable> requestBuilder = GlideToVectorYou
+                            .init()
+                            .with(MainActivity.this)
+                            .withListener(new GlideToVectorYouListener() {
+                                @Override
+                                public void onLoadFailed() {
+                                    Log.e(TAG, "onLoadFailed: Gagal load gambar cuaca");
+                                }
+
+                                @Override
+                                public void onResourceReady() {
+                                    Log.i(TAG, "onResourceReady: Berhasil load gambar cuaca");
+                                }
+                            })
+                            .setPlaceHolder(R.drawable.missing_image, R.drawable.missing_image)
+                            .getRequestBuilder();
+
+                    requestBuilder
+                            .load(Uri.parse(cuacaCurrent.get("image").getAsString()))
+                            .transition(DrawableTransitionOptions.withCrossFade())
+                            .into(ivCurrentWeather);
+
+                    JsonArray cuacaArray = data.getAsJsonArray("cuaca");
+
+                    ArrayList<Weather> weathers = new ArrayList<>();
+                    for (JsonElement jsonElement : cuacaArray) {
+                        JsonArray innerCuaca = jsonElement.getAsJsonArray();
+                        for (JsonElement jsonElement1 : innerCuaca) {
+                            Weather weather = new Weather(
+                                    jsonElement1.getAsJsonObject().get("t").getAsString(),
+                                    jsonElement1.getAsJsonObject().get("weather_desc").getAsString(),
+                                    jsonElement1.getAsJsonObject().get("image").getAsString(),
+                                    jsonElement1.getAsJsonObject().get("local_datetime").getAsString()
+                            );
+                            weathers.add(weather);
+                        }
+                    }
+
+                    weatherAdapter.updateData(weathers);
+
+                    if (weatherAdapter.getItemCount() != 0) {
+                        rvMainWeather.setVisibility(VISIBLE);
+                        cardWeatherList.setVisibility(GONE);
+                    } else {
+                        rvMainWeather.setVisibility(GONE);
+                        cardWeatherList.setVisibility(VISIBLE);
+                    }
+                }
+
+                //Tutup Progress Bar
+                pbMain.setVisibility(GONE);
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Log.e(TAG, "onFailure: error saat memanggil api kondisi cuaca saat ini: " + t.getMessage());
+            }
+        });
+    }
+
+    private void initRepository() {
+        gempaRepository = new GempaRepository();
+        weatherPredictionRepository = new WeatherPredictionRepository();
+        regionRepository = new RegionRepository(MainActivity.this);
+
+        gempaRepository.autoGempa(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    JsonObject body = response.body();
+                    JsonObject infoGempa = body.getAsJsonObject("Infogempa");
+                    JsonObject gempa = infoGempa.getAsJsonObject("gempa");
+
+                    String magnitude = gempa.get("Magnitude").getAsString();
+                    tvAutoMagnitude.setText("M " + magnitude);
+
+                    String date = gempa.get("Tanggal").getAsString();
+                    String time = gempa.get("Jam").getAsString();
+                    tvAutoDate.setText(date + " • " + time);
+
+                    String region = gempa.get("Wilayah").getAsString();
+                    tvAutoRegion.setText(region);
+
+                    String depth = gempa.get("Kedalaman").getAsString();
+                    tvAutoDepth.setText(depth);
+
+                    String image = gempa.get("Shakemap").getAsString();
+                    Glide.with(MainActivity.this)
+                            .load("https://static.bmkg.go.id/" + image)
+                            .placeholder(R.drawable.missing_image)
+                            .error(R.drawable.missing_image)
+                            .transition(DrawableTransitionOptions.withCrossFade())
+                            .diskCacheStrategy(DiskCacheStrategy.DATA)
+                            .listener(new RequestListener<Drawable>() {
+                                @Override
+                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                    Log.e(TAG, "onLoadFailed: Gagal load gambar auto gempa: " + e.getMessage());
+                                    return false;
+                                }
+
+                                @Override
+                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                    Log.i(TAG, "onResourceReady: Berhasil load gambar auto gempa");
+                                    return false;
+                                }
+                            })
+                            .into(ivAutoGempa);
+
+                    cardEarthquakeWarning.setOnClickListener(view -> {
+                        Intent intent = new Intent(MainActivity.this, EarthquakeDetailActivity.class);
+                        AutoEarthquake autoEarthquake = new AutoEarthquake(
+                                gempa.get("Tanggal").getAsString(),
+                                gempa.get("Jam").getAsString(),
+                                gempa.get("DateTime").getAsString(),
+                                gempa.get("Coordinates").getAsString(),
+                                gempa.get("Lintang").getAsString(),
+                                gempa.get("Bujur").getAsString(),
+                                gempa.get("Magnitude").getAsString(),
+                                gempa.get("Kedalaman").getAsString(),
+                                gempa.get("Wilayah").getAsString(),
+                                gempa.get("Potensi").getAsString(),
+                                gempa.get("Dirasakan").getAsString(),
+                                gempa.get("Shakemap").getAsString()
+                        );
+                        intent.putExtra("EXTRA_GEMPA", autoEarthquake);
+                        startActivity(intent);
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Terjadi suatu kesalahan: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "onFailure: error saat memanggil api auto gempa: " + t.getMessage());
+            }
+        });
+    }
+
+    private void initView() {
+        rvMainWeather = findViewById(R.id.rv_main_weather);
+        tvLocation = findViewById(R.id.tv_location);
+        tvMainCurrentPlace = findViewById(R.id.tv_main_current_place);
+        tvMainCurrentWeather = findViewById(R.id.tv_main_current_weather);
+        tvMainCurrentTime = findViewById(R.id.tv_main_current_time);
+        pbMain = findViewById(R.id.pb_main);
+        ivCurrentWeather = findViewById(R.id.iv_current_weather);
+        cardWeatherList = findViewById(R.id.card_weather_list);
+        ivAutoGempa = findViewById(R.id.iv_auto_gempa);
+        tvMoreEarthquake = findViewById(R.id.tv_more_earthquake);
+        cardEarthquakeWarning = findViewById(R.id.card_earthquake_warning);
+        tvAutoMagnitude = findViewById(R.id.tv_auto_magnitude);
+        tvAutoDate = findViewById(R.id.tv_auto_date);
+        tvAutoRegion = findViewById(R.id.tv_auto_region);
+        tvAutoDepth = findViewById(R.id.tv_auto_depth);
+
+        //Recycler View Weather
+        weatherAdapter = new WeatherAdapter(new ArrayList<Weather>());
+        rvMainWeather.setAdapter(weatherAdapter);
+        rvMainWeather.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
+        if (weatherAdapter.getItemCount() != 0) {
+            rvMainWeather.setVisibility(VISIBLE);
+            cardWeatherList.setVisibility(GONE);
+        } else {
+            rvMainWeather.setVisibility(GONE);
+            cardWeatherList.setVisibility(VISIBLE);
+        }
+
+        // Atur ukuran item
+        int itemWidth = getResources().getDimensionPixelSize(R.dimen.item_width);
+
+        // Set lebay layar
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int screenWidth = displayMetrics.widthPixels;
+
+        // Hitung span count
+        int spanCount = screenWidth / itemWidth;
+        if (spanCount < 1) {
+            spanCount = 1;
+        }
+    }
+
+    private void initLaunched() {
+        //Cek apakah user sudah memilih daerah, jika sudah maka panggil api untuk cek kondisi cuaca saat ini
+        if (!Objects.equals(regionRepository.getKeyRegionCode(), "")) {
+            currentChoosenRegion(regionRepository.getKeyRegionCode());
         }
     }
 }

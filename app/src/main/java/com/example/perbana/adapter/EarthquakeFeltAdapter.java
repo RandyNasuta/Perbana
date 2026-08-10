@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class EarthquakeFeltAdapter extends RecyclerView.Adapter<EarthquakeFeltAdapter.ViewHolder> {
     private final String TAG = "EarthquakeFeltAdapter";
 
-    private Context context;
+    private final Context context;
 
     private ArrayList<EarthquakeFelt> earthquakes = new ArrayList<>();
 

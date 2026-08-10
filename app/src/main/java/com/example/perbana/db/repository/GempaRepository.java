@@ -7,7 +7,7 @@ import com.google.gson.JsonObject;
 import retrofit2.Callback;
 
 public class GempaRepository {
-    private ApiService apiService;
+    private final ApiService apiService;
 
     public GempaRepository() {
         this.apiService = ApiClient.getClient(1);

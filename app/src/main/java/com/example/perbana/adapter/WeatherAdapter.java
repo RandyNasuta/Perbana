@@ -28,7 +28,7 @@ import java.util.ArrayList;
 public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.ViewHolder> {
     private final String TAG = "WeatherAdapter";
 
-    private ArrayList<Weather> list;
+    private final ArrayList<Weather> list;
 
     public WeatherAdapter(ArrayList<Weather> list) {
         this.list = list;

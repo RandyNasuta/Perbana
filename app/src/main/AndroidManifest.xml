@@ -26,6 +26,10 @@
             android:name=".presentation.earthquake.earthquake_list.EarthquakeListActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".presentation.earthquake.earthquake_detail.EarthquakeDetailActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

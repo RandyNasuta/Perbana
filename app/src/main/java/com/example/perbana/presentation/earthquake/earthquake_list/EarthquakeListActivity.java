@@ -52,8 +52,8 @@ public class EarthquakeListActivity extends AppCompatActivity {
     private final String TAG = "EarthquakeListActivity";
 
     //Variabel
-    private ArrayList<Earthquake> earthquakeList = new ArrayList<>();
-    private ArrayList<EarthquakeFelt> earthquakeFeltList = new ArrayList<>();
+    private final ArrayList<Earthquake> earthquakeList = new ArrayList<>();
+    private final ArrayList<EarthquakeFelt> earthquakeFeltList = new ArrayList<>();
 
     //Adapter
     private EarthquakeAdapter earthquakeAdapter;
