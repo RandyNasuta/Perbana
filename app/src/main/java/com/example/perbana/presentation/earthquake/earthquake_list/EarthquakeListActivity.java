@@ -123,6 +123,7 @@ public class EarthquakeListActivity extends AppCompatActivity {
                 ivArrowEarthquakeListFelt.animate().rotation(0f).setDuration(300).start();
             } else {
                 llExpandableEarthquakeListFelt.setVisibility(VISIBLE);
+                ivArrowEarthquakeListFelt.animate().rotation(180f).setDuration(300).start();
             }
         });
     }

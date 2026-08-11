@@ -25,6 +25,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -364,8 +365,15 @@ public class MainActivity extends AppCompatActivity {
                     JsonObject infoGempa = body.getAsJsonObject("Infogempa");
                     JsonObject gempa = infoGempa.getAsJsonObject("gempa");
 
-                    String magnitude = gempa.get("Magnitude").getAsString();
-                    tvAutoMagnitude.setText("M " + magnitude);
+                    double magnitudeValue = Double.parseDouble(gempa.get("Magnitude").getAsString());
+                    tvAutoMagnitude.setText("M " + magnitudeValue);
+                    if (magnitudeValue >= 6.0) {
+                        tvAutoMagnitude.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.danger));
+                    } else if (magnitudeValue >= 5.0) {
+                        tvAutoMagnitude.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.warning));
+                    } else {
+                        tvAutoMagnitude.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.accent_blue));
+                    }
 
                     String date = gempa.get("Tanggal").getAsString();
                     String time = gempa.get("Jam").getAsString();

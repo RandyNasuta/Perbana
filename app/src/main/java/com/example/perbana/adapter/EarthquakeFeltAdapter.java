@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.perbana.R;
@@ -38,8 +39,16 @@ public class EarthquakeFeltAdapter extends RecyclerView.Adapter<EarthquakeFeltAd
     public void onBindViewHolder(@NonNull EarthquakeFeltAdapter.ViewHolder holder, int position) {
         EarthquakeFelt earthquake = earthquakes.get(position);
 
+        double magnitudeValue = Double.parseDouble(earthquake.getMagnitude());
+        holder.tvMagnitudeValue.setText("[M " + magnitudeValue + "]");
+        if (magnitudeValue >= 6.0) {
+            holder.tvMagnitudeValue.setTextColor(ContextCompat.getColor(context, R.color.danger));
+        } else if (magnitudeValue >= 5.0) {
+            holder.tvMagnitudeValue.setTextColor(ContextCompat.getColor(context, R.color.warning));
+        } else {
+            holder.tvMagnitudeValue.setTextColor(ContextCompat.getColor(context, R.color.accent_blue));
+        }
 
-        holder.tvMagnitudeValue.setText("[M " + earthquake.getMagnitude() + "]");
         holder.tvEarthquakeLocation.setText(earthquake.getWilayah());
 
         String dateStr = earthquake.getTanggal();

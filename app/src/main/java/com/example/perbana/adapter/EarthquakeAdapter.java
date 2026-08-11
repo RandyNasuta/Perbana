@@ -7,8 +7,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.perbana.MainActivity;
 import com.example.perbana.R;
 import com.example.perbana.db.model.Earthquake;
 
@@ -38,7 +40,17 @@ public class EarthquakeAdapter extends RecyclerView.Adapter<EarthquakeAdapter.Vi
         Earthquake earthquake = earthquakes.get(position);
 
 
-        holder.tvMagnitudeValue.setText("[M " + earthquake.getMagnitude() + "]");
+        double magnitudeValue = Double.parseDouble(earthquake.getMagnitude());
+        holder.tvMagnitudeValue.setText("[M " + magnitudeValue + "]");
+
+        if (magnitudeValue >= 6.0) {
+            holder.tvMagnitudeValue.setTextColor(ContextCompat.getColor(context, R.color.danger));
+        } else if (magnitudeValue >= 5.0) {
+            holder.tvMagnitudeValue.setTextColor(ContextCompat.getColor(context, R.color.warning));
+        } else {
+            holder.tvMagnitudeValue.setTextColor(ContextCompat.getColor(context, R.color.accent_blue));
+        }
+
         holder.tvEarthquakeLocation.setText(earthquake.getWilayah());
 
         String dateStr = earthquake.getTanggal();
