@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.NestedScrollView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -26,13 +27,17 @@ import com.example.perbana.MainActivity;
 import com.example.perbana.R;
 import com.example.perbana.db.model.AutoEarthquake;
 
+import java.util.Objects;
+
 public class EarthquakeDetailActivity extends AppCompatActivity {
     private final String TAG = "EarthquakeDetailActivity";
 
     //Variabel
     private AutoEarthquake autoEarthquake = null;
+    private int weatherBackgroundResource = 0;
 
     //View Group
+    private NestedScrollView activityEarthquakeDetail = null;
     private ImageView ivDetailShakemap = null;
     private TextView tvDetailMagnitude = null;
     private TextView tvDetailStatus = null;
@@ -58,12 +63,14 @@ public class EarthquakeDetailActivity extends AppCompatActivity {
 
         if (getIntent() != null) {
             autoEarthquake = getIntent().getParcelableExtra("EXTRA_GEMPA");
+            weatherBackgroundResource = getIntent().getIntExtra("EXTRA_BACKGROUND_RESOURCE", 0);
         }
 
         initView();
     }
 
     private void initView() {
+        activityEarthquakeDetail = findViewById(R.id.activity_earthquake_detail);
         ivDetailShakemap = findViewById(R.id.iv_detail_shakemap);
         tvDetailMagnitude = findViewById(R.id.tv_detail_magnitude);
         tvDetailStatus = findViewById(R.id.tv_detail_status);
@@ -116,6 +123,11 @@ public class EarthquakeDetailActivity extends AppCompatActivity {
         } else {
             tvDetailMagnitude.setTextColor(ContextCompat.getColor(EarthquakeDetailActivity.this, R.color.accent_blue));
             tvDetailStatus.setBackgroundResource(R.drawable.bg_badge_soft);
+        }
+
+        if (weatherBackgroundResource != 0) {
+            Log.i(TAG, "onCreate: nilai backround: " + weatherBackgroundResource);
+            activityEarthquakeDetail.setBackgroundResource(weatherBackgroundResource);
         }
     }
 }

@@ -1,18 +1,20 @@
 package com.example.perbana.db.network.api;
 
 import android.util.Log;
-
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 public class ApiClient {
     private static final String TAG = "ApiClient";
     private static final String BASE_URL1 = "https://data.bmkg.go.id/";
     private static final String BASE_URL2 = "https://api.bmkg.go.id/publik/";
+    private static final String BASE_URL3 = "https://www.bmkg.go.id/";
     private static Retrofit retrofit1 = null;
     private static Retrofit retrofit2 = null;
+    private static Retrofit retrofit3 = null;
 
     private static OkHttpClient getHttpClient() {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
@@ -45,6 +47,15 @@ public class ApiClient {
                             .build();
                 }
                 return retrofit2.create(ApiService.class);
+            case 3:
+                if (retrofit3 == null) {
+                    retrofit3 = new Retrofit.Builder()
+                            .baseUrl(BASE_URL3)
+                            .client(getHttpClient())
+                            .addConverterFactory(SimpleXmlConverterFactory.create())
+                            .build();
+                }
+                return retrofit3.create(ApiService.class);
             default:
                 Log.e(TAG, "getClient: Tidak ada kode base yang sesuai");
                 return null;

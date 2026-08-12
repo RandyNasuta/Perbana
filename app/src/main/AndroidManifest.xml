@@ -30,6 +30,14 @@
             android:name=".presentation.earthquake.earthquake_detail.EarthquakeDetailActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".presentation.weather.weather_warning_detail.WeatherWarningDetailActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".presentation.weather.weather_warning_list.WeatherWarningListActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

@@ -17,6 +17,7 @@ glideVector = "v2.0.0"
 activityKtx = "1.13.0"
 navigationFragment = "2.9.8"
 navigationUi = "2.9.8"
+converterSimplexml = "2.9.0"
 
 [libraries]
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -37,6 +38,7 @@ glide-vector = { module = "com.github.corouteam:GlideToVectorYou", version.ref =
 activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
 navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
 navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigationUi" }
+converter-simplexml = { module = "com.squareup.retrofit2:converter-simplexml", version.ref = "converterSimplexml" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

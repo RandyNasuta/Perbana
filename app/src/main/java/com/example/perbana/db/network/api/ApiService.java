@@ -1,5 +1,6 @@
 package com.example.perbana.db.network.api;
 
+import com.example.perbana.db.network.util.RssResponse;
 import com.google.gson.JsonObject;
 
 import retrofit2.Call;
@@ -18,4 +19,7 @@ public interface ApiService {
 
     @GET("DataMKG/TEWS/gempadirasakan.json")
     Call<JsonObject> getEarthquakeFeltList();
+
+    @GET("alerts/nowcast/id")
+    Call<RssResponse> getWeatherWarningList();
 }

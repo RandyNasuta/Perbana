@@ -5,17 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@drawable/background_sunny"
-    android:paddingHorizontal="24dp">
+    android:id="@+id/main"
+    android:background="@drawable/bg_weather_sunny">
 
     <FrameLayout
+        android:paddingHorizontal="24dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <LinearLayout
+            android:id="@+id/ll_main"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/main"
             tools:context=".MainActivity"
             android:orientation="vertical">
 
@@ -162,12 +163,13 @@
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Informasi Cuaca"
+                    android:text="Peringatan cuaca"
                     android:textStyle="bold"
                     android:layout_weight="1"
                     android:textColor="@color/black"/>
 
                 <TextView
+                    android:id="@+id/tv_weather_warning_list_more"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="Lihat lebih banyak"
@@ -182,31 +184,52 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginBottom="24dp">
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="24dp"
-                    tools:ignore="UseCompoundDrawables">
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:layout_margin="8dp"
+                        android:padding="8dp"
                         android:src="@drawable/warning"
                         android:contentDescription="@string/warning_image"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="8dp"
-                        android:text="@string/warning_title"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:orientation="vertical">
 
+                        <TextView
+                            android:id="@+id/tv_warning_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/warning_title"
+                            android:textSize="@dimen/text_size_body_large"
+                            android:textStyle="bold"
+                            android:textColor="@color/black"
+                            android:maxLines="2"
+                            android:ellipsize="end"/>
+
+                        <TextView
+                            android:id="@+id/tv_warning_subtitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Lihat detail wilayah terdampak"
+                            android:textSize="@dimen/text_size_body_medium"
+                            android:textColor="@color/text_gray"
+                            android:layout_marginTop="2dp"/>
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -318,13 +341,33 @@
 
         </LinearLayout>
 
-        <ProgressBar
-            android:id="@+id/pb_main"
-            style="@style/Widget.AppCompat.ProgressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone"/>
+        <LinearLayout
+            android:id="@+id/ll_progress"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:id="@+id/pb_main"
+                style="@style/Widget.AppCompat.ProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <View
+                android:layout_marginVertical="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sedang memuat data"
+                android:textSize="@dimen/text_size_body_medium"
+                android:gravity="center"/>
+        </LinearLayout>
+
     </FrameLayout>
 
 

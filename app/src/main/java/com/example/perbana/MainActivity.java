@@ -17,7 +17,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,11 +46,16 @@ import com.example.perbana.adapter.WeatherAdapter;
 import com.example.perbana.db.model.AutoEarthquake;
 import com.example.perbana.db.model.RegionCode;
 import com.example.perbana.db.model.Weather;
+import com.example.perbana.db.model.WeatherWarning;
+import com.example.perbana.db.network.util.RssResponse;
 import com.example.perbana.db.repository.GempaRepository;
 import com.example.perbana.db.repository.RegionRepository;
 import com.example.perbana.db.repository.WeatherPredictionRepository;
+import com.example.perbana.db.repository.WeatherWarningRepository;
 import com.example.perbana.presentation.earthquake.earthquake_detail.EarthquakeDetailActivity;
 import com.example.perbana.presentation.earthquake.earthquake_list.EarthquakeListActivity;
+import com.example.perbana.presentation.weather.weather_warning_detail.WeatherWarningDetailActivity;
+import com.example.perbana.presentation.weather.weather_warning_list.WeatherWarningListActivity;
 import com.example.perbana.util.CsvReader;
 import com.example.perbana.util.DateUtil;
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou;
@@ -61,6 +68,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -69,15 +77,20 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "MainActivity";
-    private final ArrayList<RegionCode> regionCodeList = new ArrayList<>();
+
     // Repository
     private GempaRepository gempaRepository;
     private WeatherPredictionRepository weatherPredictionRepository;
+    private WeatherWarningRepository weatherWarningRepository;
     private RegionRepository regionRepository;
+
     // Variabel
+    private final ArrayList<RegionCode> regionCodeList = new ArrayList<>();
     private WeatherAdapter weatherAdapter = null;
     private AlertDialog.Builder dialog = null;
     private CsvReader csvReader = null;
+    private int weatherBackgroundResource = 0;
+
     //List untuk menampung data kode daerah;
     private ArrayList<RegionCode> provinceRegionList = null;
     private ArrayList<RegionCode> regencyRegionList = null;
@@ -86,6 +99,9 @@ public class MainActivity extends AppCompatActivity {
     private String choosenRegion = "";
 
     //View
+    private ScrollView svMain = null;
+    private LinearLayout llMain = null;
+    private LinearLayout llProgress = null;
     private RecyclerView rvMainWeather;
     private TextView tvLocation;
     private AutoCompleteTextView autoProvince = null;
@@ -99,17 +115,19 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar pbMain = null;
     private ImageView ivCurrentWeather = null;
     private MaterialCardView cardWeatherList = null;
-    private TextView tvMainCurrentPlace;
-    private TextView tvMainCurrentWeather;
-    private TextView tvMainCurrentTime;
-    private TextView tvMoreEarthquake;
-    private ImageView ivAutoGempa;
-    private MaterialCardView cardEarthquakeWarning;
-    private TextView tvAutoMagnitude;
-    private TextView tvAutoDate;
-    private TextView tvAutoRegion;
-    private TextView tvAutoDepth;
-
+    private TextView tvMainCurrentPlace = null;
+    private TextView tvMainCurrentWeather = null;
+    private TextView tvMainCurrentTime = null;
+    private TextView tvMoreEarthquake = null;
+    private ImageView ivAutoGempa = null;
+    private MaterialCardView cardEarthquakeWarning = null;
+    private TextView tvAutoMagnitude = null;
+    private TextView tvAutoDate = null;
+    private TextView tvAutoRegion = null;
+    private TextView tvAutoDepth = null;
+    private TextView tvWarningTitle = null;
+    private MaterialCardView cardWeatherWarning = null;
+    private TextView tvWeatherWarningListMore = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -270,7 +288,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void currentChoosenRegion(String choosenRegion) {
         //Tampilkan progress bar
-        pbMain.setVisibility(VISIBLE);
+        llMain.setVisibility(GONE);
+        llProgress.setVisibility(VISIBLE);
 
         //Ambil data dari API
         weatherPredictionRepository.getWeatherPrediction(choosenRegion, new Callback<JsonObject>() {
@@ -314,6 +333,17 @@ public class MainActivity extends AppCompatActivity {
                             .transition(DrawableTransitionOptions.withCrossFade())
                             .into(ivCurrentWeather);
 
+                    if (cuacaCurrent.get("weather").getAsInt() == 0 || cuacaCurrent.get("weather").getAsInt() == 1) {
+                        svMain.setBackgroundResource(R.drawable.bg_weather_sunny);
+                        weatherBackgroundResource = R.drawable.bg_weather_sunny;
+                    } else if (cuacaCurrent.get("weather").getAsInt() == 2) {
+                        svMain.setBackgroundResource(R.drawable.bg_weather_cloudy);
+                        weatherBackgroundResource = R.drawable.bg_weather_cloudy;
+                    } else {
+                        svMain.setBackgroundResource(R.drawable.bg_weather_rainy);
+                        weatherBackgroundResource = R.drawable.bg_weather_rainy;
+                    }
+
                     JsonArray cuacaArray = data.getAsJsonArray("cuaca");
 
                     ArrayList<Weather> weathers = new ArrayList<>();
@@ -342,7 +372,8 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 //Tutup Progress Bar
-                pbMain.setVisibility(GONE);
+                llMain.setVisibility(VISIBLE);
+                llProgress.setVisibility(GONE);
             }
 
             @Override
@@ -354,8 +385,34 @@ public class MainActivity extends AppCompatActivity {
 
     private void initRepository() {
         gempaRepository = new GempaRepository();
+        weatherWarningRepository = new WeatherWarningRepository();
         weatherPredictionRepository = new WeatherPredictionRepository();
         regionRepository = new RegionRepository(MainActivity.this);
+
+        weatherWarningRepository.getWeatherWarning(new Callback<RssResponse>() {
+            @Override
+            public void onResponse(Call<RssResponse> call, Response<RssResponse> response) {
+                RssResponse rssData = response.body();
+
+                Log.i(TAG, "onResponse: Nilai rss: " + rssData.getChannel().getItemList().get(0));
+
+                if (rssData.getChannel() != null && rssData.getChannel().getItemList() != null) {
+                    List<WeatherWarning> weatherWarningList = rssData.getChannel().getItemList();
+
+                    if (!weatherWarningList.isEmpty()) {
+                        WeatherWarning weatherWarning = weatherWarningList.get(0);
+
+                        String titleWarning = weatherWarning.getTitle().trim();
+                        tvWarningTitle.setText(titleWarning);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RssResponse> call, Throwable t) {
+                Log.e(TAG, "onFailure: error saat memanggil api rss: " + t.getMessage());
+            }
+        });
 
         gempaRepository.autoGempa(new Callback<JsonObject>() {
             @Override
@@ -424,6 +481,7 @@ public class MainActivity extends AppCompatActivity {
                                 gempa.get("Shakemap").getAsString()
                         );
                         intent.putExtra("EXTRA_GEMPA", autoEarthquake);
+                        intent.putExtra("EXTRA_BACKGROUND_RESOURCE", weatherBackgroundResource);
                         startActivity(intent);
                     });
                 }
@@ -438,11 +496,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        svMain = findViewById(R.id.main);
+        llMain = findViewById(R.id.ll_main);
         rvMainWeather = findViewById(R.id.rv_main_weather);
         tvLocation = findViewById(R.id.tv_location);
         tvMainCurrentPlace = findViewById(R.id.tv_main_current_place);
         tvMainCurrentWeather = findViewById(R.id.tv_main_current_weather);
         tvMainCurrentTime = findViewById(R.id.tv_main_current_time);
+        llProgress = findViewById(R.id.ll_progress);
         pbMain = findViewById(R.id.pb_main);
         ivCurrentWeather = findViewById(R.id.iv_current_weather);
         cardWeatherList = findViewById(R.id.card_weather_list);
@@ -453,6 +514,9 @@ public class MainActivity extends AppCompatActivity {
         tvAutoDate = findViewById(R.id.tv_auto_date);
         tvAutoRegion = findViewById(R.id.tv_auto_region);
         tvAutoDepth = findViewById(R.id.tv_auto_depth);
+        tvWarningTitle = findViewById(R.id.tv_warning_title);
+        cardWeatherWarning = findViewById(R.id.card_weather_warning);
+        tvWeatherWarningListMore = findViewById(R.id.tv_weather_warning_list_more);
 
         //Recycler View Weather
         weatherAdapter = new WeatherAdapter(new ArrayList<Weather>());
@@ -479,6 +543,16 @@ public class MainActivity extends AppCompatActivity {
         if (spanCount < 1) {
             spanCount = 1;
         }
+
+        tvWeatherWarningListMore.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, WeatherWarningListActivity.class);
+            startActivity(intent);
+        });
+
+        cardWeatherWarning.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, WeatherWarningDetailActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void initLaunched() {

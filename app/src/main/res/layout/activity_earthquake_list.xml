@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@drawable/background_sunny"
+    android:background="@drawable/bg_weather_sunny"
     android:paddingHorizontal="16dp"
     tools:context=".presentation.earthquake.earthquake_list.EarthquakeListActivity">
 
