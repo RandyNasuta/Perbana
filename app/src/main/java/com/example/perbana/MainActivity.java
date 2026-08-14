@@ -47,7 +47,7 @@ import com.example.perbana.db.model.AutoEarthquake;
 import com.example.perbana.db.model.RegionCode;
 import com.example.perbana.db.model.Weather;
 import com.example.perbana.db.model.WeatherWarning;
-import com.example.perbana.db.network.util.RssResponse;
+import com.example.perbana.db.model.Rss;
 import com.example.perbana.db.repository.GempaRepository;
 import com.example.perbana.db.repository.RegionRepository;
 import com.example.perbana.db.repository.WeatherPredictionRepository;
@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     private AlertDialog.Builder dialog = null;
     private CsvReader csvReader = null;
     private int weatherBackgroundResource = 0;
+    private String linkWeatherWarning = "";
 
     //List untuk menampung data kode daerah;
     private ArrayList<RegionCode> provinceRegionList = null;
@@ -389,18 +390,27 @@ public class MainActivity extends AppCompatActivity {
         weatherPredictionRepository = new WeatherPredictionRepository();
         regionRepository = new RegionRepository(MainActivity.this);
 
-        weatherWarningRepository.getWeatherWarning(new Callback<RssResponse>() {
+        weatherWarningRepository.getWeatherWarning(new Callback<Rss>() {
             @Override
-            public void onResponse(Call<RssResponse> call, Response<RssResponse> response) {
-                RssResponse rssData = response.body();
+            public void onResponse(Call<Rss> call, Response<Rss> response) {
+                Rss rssData = response.body();
 
                 Log.i(TAG, "onResponse: Nilai rss: " + rssData.getChannel().getItemList().get(0));
 
                 if (rssData.getChannel() != null && rssData.getChannel().getItemList() != null) {
                     List<WeatherWarning> weatherWarningList = rssData.getChannel().getItemList();
 
+                    tvWeatherWarningListMore.setOnClickListener(view -> {
+                        Intent intent = new Intent(MainActivity.this, WeatherWarningListActivity.class);
+                        intent.putExtra("EXTRA_WEATHER_WARNING_LIST", (ArrayList<WeatherWarning>) weatherWarningList);
+                        intent.putExtra("EXTRA_LAST_BUILD_DATE", rssData.getChannel().getLastBuildDate());
+                        startActivity(intent);
+                    });
+
                     if (!weatherWarningList.isEmpty()) {
                         WeatherWarning weatherWarning = weatherWarningList.get(0);
+
+                        linkWeatherWarning = weatherWarning.getLink();
 
                         String titleWarning = weatherWarning.getTitle().trim();
                         tvWarningTitle.setText(titleWarning);
@@ -409,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<RssResponse> call, Throwable t) {
+            public void onFailure(Call<Rss> call, Throwable t) {
                 Log.e(TAG, "onFailure: error saat memanggil api rss: " + t.getMessage());
             }
         });
@@ -551,6 +561,7 @@ public class MainActivity extends AppCompatActivity {
 
         cardWeatherWarning.setOnClickListener(view -> {
             Intent intent = new Intent(MainActivity.this, WeatherWarningDetailActivity.class);
+            intent.putExtra("EXTRA_LINK", linkWeatherWarning);
             startActivity(intent);
         });
     }

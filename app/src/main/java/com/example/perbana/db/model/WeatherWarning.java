@@ -3,8 +3,10 @@ package com.example.perbana.db.model;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
+import java.io.Serializable;
+
 @Root(name = "item", strict = false)
-public class WeatherWarning {
+public class WeatherWarning implements Serializable {
     @Element(name = "title", required = false)
     private String title;
     @Element(name = "link", required = false)

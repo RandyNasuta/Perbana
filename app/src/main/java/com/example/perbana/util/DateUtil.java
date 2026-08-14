@@ -2,10 +2,12 @@ package com.example.perbana.util;
 
 import android.util.Log;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class DateUtil {
     private static final String TAG = "DateUtil";
@@ -28,5 +30,24 @@ public class DateUtil {
             Log.e(TAG, "onResponse: error date parse: " + e.getMessage());
         }
         return null;
+    }
+
+    public static String weatherWarningDate(String dateString) {
+        if (dateString == null || dateString.trim().isEmpty()) {
+            return "-";
+        }
+
+        SimpleDateFormat inputFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+        SimpleDateFormat outputFormat = new SimpleDateFormat("EEE, dd MMM yyyy • HH:mm 'WIB'", new Locale("id", "ID"));
+
+        outputFormat.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"));
+
+        try {
+            Date date = inputFormat.parse(dateString);
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            Log.e(TAG, "weatherWarningDate: error: " + e.getMessage());
+            return dateString;
+        }
     }
 }

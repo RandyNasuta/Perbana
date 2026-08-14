@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/activity_earthquake_detail"
+    android:id="@+id/main"
     tools:context=".presentation.earthquake.earthquake_detail.EarthquakeDetailActivity"
     android:background="@drawable/bg_weather_sunny">
 
@@ -28,6 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scaleType="center"
+                android:src="@drawable/missing_image"
                 android:contentDescription="Peta guncangan gempa"/>
         </com.google.android.material.card.MaterialCardView>
 

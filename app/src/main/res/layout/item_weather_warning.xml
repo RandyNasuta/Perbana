@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    android:id="@+id/card_item_weather_warning"
+    app:strokeColor="@color/surface_card"
+    app:cardBackgroundColor="@color/white">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/tv_warning_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Judul Peringatan cuaca"
+                    android:textColor="@color/primary_text"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/text_size_title_medium"/>
+
+                <TextView
+                    android:id="@+id/tv_warning_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="09 Agustus 2026 • 10:202 WIB"
+                    android:textColor="@color/text_gray"
+                    android:textSize="@dimen/text_size_body_medium"/>
+
+                <TextView
+                    android:id="@+id/tv_warning_author"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="BMKG"
+                    android:textColor="@color/text_gray"
+                    android:textSize="@dimen/text_size_body_medium"/>
+            </LinearLayout>
+
+
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/surface_card"
+            android:layout_marginVertical="12dp"/>
+
+        <TextView
+            android:id="@+id/tv_tsunami_potential"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="deskripsi"
+            android:textColor="@color/accent_blue"
+            android:textStyle="bold"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:scrollHorizontally="false"
+            android:textSize="@dimen/text_size_body_medium"/>
+    </LinearLayout>
+
+
+</com.google.android.material.card.MaterialCardView>

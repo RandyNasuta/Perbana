@@ -55,7 +55,7 @@ public class EarthquakeDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_earthquake_detail);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.activity_earthquake_detail), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -70,7 +70,7 @@ public class EarthquakeDetailActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        activityEarthquakeDetail = findViewById(R.id.activity_earthquake_detail);
+        activityEarthquakeDetail = findViewById(R.id.main);
         ivDetailShakemap = findViewById(R.id.iv_detail_shakemap);
         tvDetailMagnitude = findViewById(R.id.tv_detail_magnitude);
         tvDetailStatus = findViewById(R.id.tv_detail_status);
