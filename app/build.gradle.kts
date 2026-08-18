@@ -68,4 +68,7 @@ dependencies {
 
     //Lottie
     implementation(libs.lottie)
+
+    //Swipe Refresh Layout
+    implementation(libs.swipe.refresh.layout)
 }

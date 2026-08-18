@@ -19,7 +19,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +32,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     private String choosenRegion = "";
 
     //View
-    private ScrollView svMain = null;
+    private SwipeRefreshLayout main = null;
     private LinearLayout llMain = null;
     private LinearLayout llProgress = null;
     private RecyclerView rvMainWeather;
@@ -149,7 +149,11 @@ public class MainActivity extends AppCompatActivity {
 
         initRepository();
         initView();
-        initLaunched();
+        initLaunched(false);
+
+        main.setOnRefreshListener(() -> {
+            initLaunched(true);
+        });
 
         tvLocation.setOnClickListener(view -> {
             dialog = new MaterialAlertDialogBuilder(MainActivity.this);
@@ -335,13 +339,13 @@ public class MainActivity extends AppCompatActivity {
                             .into(ivCurrentWeather);
 
                     if (cuacaCurrent.get("weather").getAsInt() == 0 || cuacaCurrent.get("weather").getAsInt() == 1) {
-                        svMain.setBackgroundResource(R.drawable.bg_weather_sunny);
+                        main.setBackgroundResource(R.drawable.bg_weather_sunny);
                         weatherBackgroundResource = R.drawable.bg_weather_sunny;
                     } else if (cuacaCurrent.get("weather").getAsInt() == 2) {
-                        svMain.setBackgroundResource(R.drawable.bg_weather_cloudy);
+                        main.setBackgroundResource(R.drawable.bg_weather_cloudy);
                         weatherBackgroundResource = R.drawable.bg_weather_cloudy;
                     } else {
-                        svMain.setBackgroundResource(R.drawable.bg_weather_rainy);
+                        main.setBackgroundResource(R.drawable.bg_weather_rainy);
                         weatherBackgroundResource = R.drawable.bg_weather_rainy;
                     }
 
@@ -506,7 +510,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        svMain = findViewById(R.id.main);
+        main = findViewById(R.id.main);
         llMain = findViewById(R.id.ll_main);
         rvMainWeather = findViewById(R.id.rv_main_weather);
         tvLocation = findViewById(R.id.tv_location);
@@ -562,14 +566,19 @@ public class MainActivity extends AppCompatActivity {
         cardWeatherWarning.setOnClickListener(view -> {
             Intent intent = new Intent(MainActivity.this, WeatherWarningDetailActivity.class);
             intent.putExtra("EXTRA_LINK", linkWeatherWarning);
+            intent.putExtra("EXTRA_BACKGROUND_RESOURCE", weatherBackgroundResource);
             startActivity(intent);
         });
     }
 
-    private void initLaunched() {
+    private void initLaunched(boolean isRefreshLayout) {
         //Cek apakah user sudah memilih daerah, jika sudah maka panggil api untuk cek kondisi cuaca saat ini
         if (!Objects.equals(regionRepository.getKeyRegionCode(), "")) {
             currentChoosenRegion(regionRepository.getKeyRegionCode());
+        }
+
+        if (isRefreshLayout) {
+            main.setRefreshing(false);
         }
     }
 }

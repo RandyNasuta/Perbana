@@ -2,6 +2,7 @@ package com.example.perbana.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +56,13 @@ public class WeatherWarningAdapter extends RecyclerView.Adapter<WeatherWarningAd
     @Override
     public int getItemCount() {
         return list.size();
+    }
+
+    public void updateData(List<WeatherWarning> weatherWarningList) {
+        this.list.clear();
+        this.list.addAll(weatherWarningList);
+        Log.i(TAG, "updateData: new data list: " + list.toString());
+        notifyDataSetChanged();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

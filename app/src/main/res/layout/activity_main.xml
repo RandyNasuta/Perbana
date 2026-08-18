@@ -1,375 +1,378 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
     android:id="@+id/main"
     android:background="@drawable/bg_weather_sunny">
-
-    <FrameLayout
-        android:paddingHorizontal="24dp"
+    
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <LinearLayout
-            android:id="@+id/ll_main"
+        <FrameLayout
+            android:paddingHorizontal="24dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:context=".MainActivity"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
             <LinearLayout
-                android:id="@+id/ll_location"
+                android:id="@+id/ll_main"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="32dp">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/outline_add_location_24"/>
-
-                <TextView
-                    android:id="@+id/tv_location"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Provinsi, Kabupaten, Kecamatan, Desa"
-                    android:layout_weight="1"
-                    android:layout_marginHorizontal="5dp"
-                    android:textColor="@color/black"
-                    android:textStyle="bold"/>
-
-            </LinearLayout>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_main_weather"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:alpha="0.8"
-                app:cardCornerRadius="25dp"
-                app:cardElevation="5dp"
-                app:cardPreventCornerOverlap="false"
-                app:cardUseCompatPadding="true">
+                android:orientation="vertical"
+                android:visibility="visible">
 
                 <LinearLayout
+                    android:id="@+id/ll_location"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:baselineAligned="false"
-                    android:gravity="center_vertical">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginEnd="5dp"
-                        android:layout_weight="1">
-
-                        <TextView
-                            android:id="@+id/tv_main_current_place"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="5dp"
-                            android:text="31\u2103"
-                            android:textSize="32sp" />
-
-                        <TextView
-                            android:id="@+id/tv_main_current_weather"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Gambir (Cerah)"
-                            android:textSize="24sp" />
-
-                        <TextView
-                            android:id="@+id/tv_main_current_time"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="10 Januari 2025 (12.00)"
-                            android:textSize="16sp" />
-                    </LinearLayout>
+                    android:layout_marginTop="32dp">
 
                     <ImageView
-                        android:id="@+id/iv_current_weather"
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
-                        android:padding="8dp"
-                        android:src="@drawable/missing_image"
-                        android:scaleType="fitCenter"
-                        android:adjustViewBounds="true"
-                        android:contentDescription="Gambar ikon cuaca"/>
-                </LinearLayout>
-
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_main_weather"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:nestedScrollingEnabled="false" />
-
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_weather_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="24dp"
-                    tools:ignore="UseCompoundDrawables">
-
-                    <ImageView
-                        android:id="@+id/iv_weather_warning"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_margin="8dp"
-                        android:src="@drawable/warning"
-                        android:contentDescription="@string/warning_image"/>
-
-                    <TextView
-                        android:id="@+id/tv_title_weather_warning"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="8dp"
-                        android:text="Data cuaca tidak tersedia"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:src="@drawable/outline_add_location_24"/>
+
+                    <TextView
+                        android:id="@+id/tv_location"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Provinsi, Kabupaten, Kecamatan, Desa"
+                        android:layout_weight="1"
+                        android:layout_marginHorizontal="5dp"
+                        android:textColor="@color/black"
+                        android:textStyle="bold"/>
 
                 </LinearLayout>
 
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="2"
-                android:paddingHorizontal="4dp"
-                android:layout_marginTop="16dp">
-
-                <TextView
-                    android:layout_width="0dp"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_main_weather"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Peringatan cuaca"
-                    android:textStyle="bold"
-                    android:layout_weight="1"
-                    android:textColor="@color/black"/>
+                    android:layout_marginBottom="8dp"
+                    android:alpha="0.8"
+                    app:cardCornerRadius="25dp"
+                    app:cardElevation="5dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:cardUseCompatPadding="true">
 
-                <TextView
-                    android:id="@+id/tv_weather_warning_list_more"
-                    android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:baselineAligned="false"
+                        android:gravity="center_vertical">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginEnd="5dp"
+                            android:layout_weight="1">
+
+                            <TextView
+                                android:id="@+id/tv_main_current_place"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:text="31\u2103"
+                                android:textSize="32sp" />
+
+                            <TextView
+                                android:id="@+id/tv_main_current_weather"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Gambir (Cerah)"
+                                android:textSize="24sp" />
+
+                            <TextView
+                                android:id="@+id/tv_main_current_time"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="10 Januari 2025 (12.00)"
+                                android:textSize="16sp" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/iv_current_weather"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:padding="8dp"
+                            android:src="@drawable/missing_image"
+                            android:scaleType="fitCenter"
+                            android:adjustViewBounds="true"
+                            android:contentDescription="Gambar ikon cuaca"/>
+                    </LinearLayout>
+
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_main_weather"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Lihat lebih banyak"
-                    android:textStyle="bold"
-                    android:layout_weight="1"
-                    android:gravity="right"
-                    android:textColor="@color/black"/>
-            </LinearLayout>
+                    android:layout_marginTop="8dp"
+                    android:nestedScrollingEnabled="false" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_weather_warning"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/white">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_weather_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="24dp"
+                        tools:ignore="UseCompoundDrawables">
+
+                        <ImageView
+                            android:id="@+id/iv_weather_warning"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_margin="8dp"
+                            android:src="@drawable/warning"
+                            android:contentDescription="@string/warning_image"/>
+
+                        <TextView
+                            android:id="@+id/tv_title_weather_warning"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="8dp"
+                            android:text="Data cuaca tidak tersedia"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+
+                </com.google.android.material.card.MaterialCardView>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:weightSum="2"
+                    android:paddingHorizontal="4dp"
+                    android:layout_marginTop="16dp">
 
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:padding="8dp"
-                        android:src="@drawable/warning"
-                        android:contentDescription="@string/warning_image"/>
-                    
-                    <LinearLayout
+                    <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:text="Peringatan cuaca"
+                        android:textStyle="bold"
                         android:layout_weight="1"
-                        android:layout_marginStart="12dp"
-                        android:orientation="vertical">
+                        android:textColor="@color/black"/>
 
-                        <TextView
-                            android:id="@+id/tv_warning_title"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/warning_title"
-                            android:textSize="@dimen/text_size_body_large"
-                            android:textStyle="bold"
-                            android:textColor="@color/black"
-                            android:maxLines="2"
-                            android:ellipsize="end"/>
-
-                        <TextView
-                            android:id="@+id/tv_warning_subtitle"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Lihat detail wilayah terdampak"
-                            android:textSize="@dimen/text_size_body_medium"
-                            android:textColor="@color/text_gray"
-                            android:layout_marginTop="2dp"/>
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/tv_weather_warning_list_more"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Lihat lebih banyak"
+                        android:textStyle="bold"
+                        android:layout_weight="1"
+                        android:gravity="right"
+                        android:textColor="@color/black"/>
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="2"
-                android:paddingHorizontal="4dp">
-
-                <TextView
-                    android:layout_width="0dp"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_weather_warning"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Gempa Terbaru"
-                    android:textStyle="bold"
-                    android:layout_weight="1"
-                    android:textColor="@color/black"/>
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="24dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@color/white">
 
-                <TextView
-                    android:id="@+id/tv_more_earthquake"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="Lihat lebih banyak"
-                    android:textStyle="bold"
-                    android:layout_weight="1"
-                    android:gravity="right"
-                    android:textColor="@color/black"/>
-            </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="16dp">
 
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:padding="8dp"
+                            android:src="@drawable/warning"
+                            android:contentDescription="@string/warning_image"/>
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_earthquake_warning"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/surface_card"
-                app:cardBackgroundColor="@color/white">
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tv_warning_title"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/warning_title"
+                                android:textSize="@dimen/text_size_body_large"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:maxLines="2"
+                                android:ellipsize="end"/>
+
+                            <TextView
+                                android:id="@+id/tv_warning_subtitle"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Lihat detail wilayah terdampak"
+                                android:textSize="@dimen/text_size_body_medium"
+                                android:textColor="@color/text_gray"
+                                android:layout_marginTop="2dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="horizontal"
+                    android:weightSum="2"
+                    android:paddingHorizontal="4dp">
 
-                    <ImageView
-                        android:id="@+id/iv_auto_gempa"
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/missing_image"
-                        android:contentDescription="Gambar auto gempa"/>
-                    
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Gempa Terbaru"
+                        android:textStyle="bold"
+                        android:layout_weight="1"
+                        android:textColor="@color/black"/>
+
+                    <TextView
+                        android:id="@+id/tv_more_earthquake"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Lihat lebih banyak"
+                        android:textStyle="bold"
+                        android:layout_weight="1"
+                        android:gravity="right"
+                        android:textColor="@color/black"/>
+                </LinearLayout>
+
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_earthquake_warning"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/surface_card"
+                    app:cardBackgroundColor="@color/white">
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-                        
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/iv_auto_gempa"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/missing_image"
+                            android:contentDescription="Gambar auto gempa"/>
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
-                            
-                            <TextView
-                                android:id="@+id/tv_auto_magnitude"
-                                android:layout_width="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="M 4.3"
-                                android:textColor="@color/accent_blue"
-                                android:textStyle="bold"
-                                android:textSize="@dimen/text_size_h3"/>
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:id="@+id/tv_auto_magnitude"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="M 4.3"
+                                    android:textColor="@color/accent_blue"
+                                    android:textStyle="bold"
+                                    android:textSize="@dimen/text_size_h3"/>
+
+                                <TextView
+                                    android:id="@+id/tv_auto_date"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:gravity="end"
+                                    android:text="10 Agu 2026 • 03:35 WIB"
+                                    android:textColor="@color/text_gray"
+                                    android:textSize="12sp"/>
+                            </LinearLayout>
 
                             <TextView
-                                android:id="@+id/tv_auto_date"
-                                android:layout_width="0dp"
+                                android:id="@+id/tv_auto_region"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:gravity="end"
-                                android:text="10 Agu 2026 • 03:35 WIB"
+                                android:layout_marginTop="6dp"
+                                android:text="Wilayah pusat gempa"
+                                android:textColor="@color/primary_text"
+                                android:textSize="14sp"/>
+
+                            <TextView
+                                android:id="@+id/tv_auto_depth"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Kedalaman 15 km"
                                 android:textColor="@color/text_gray"
                                 android:textSize="12sp"/>
                         </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/tv_auto_region"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:text="Wilayah pusat gempa"
-                            android:textColor="@color/primary_text"
-                            android:textSize="14sp"/>
-
-                        <TextView
-                            android:id="@+id/tv_auto_depth"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="Kedalaman 15 km"
-                            android:textColor="@color/text_gray"
-                            android:textSize="12sp"/>
                     </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                </com.google.android.material.card.MaterialCardView>
 
-        </LinearLayout>
+            </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/ll_progress"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:visibility="gone">
-
-            <ProgressBar
-                android:id="@+id/pb_main"
-                style="@style/Widget.AppCompat.ProgressBar"
+            <LinearLayout
+                android:id="@+id/ll_progress"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone">
 
-            <View
-                android:layout_marginVertical="5dp"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"/>
+                <ProgressBar
+                    android:id="@+id/pb_main"
+                    style="@style/Widget.AppCompat.ProgressBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Sedang memuat data"
-                android:textSize="@dimen/text_size_body_medium"
-                android:gravity="center"/>
-        </LinearLayout>
+                <View
+                    android:layout_marginVertical="5dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"/>
 
-    </FrameLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Sedang memuat data"
+                    android:textSize="@dimen/text_size_body_medium"
+                    android:gravity="center"/>
+            </LinearLayout>
 
+        </FrameLayout>
+    </ScrollView>
 
-
-</ScrollView>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

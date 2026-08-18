@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -39,6 +40,7 @@ public class WeatherWarningDetailActivity extends AppCompatActivity {
 
     //Variabel
     private String link = "";
+    private int weatherBackgroundResource = 0;
 
     //View Group
     private ImageView ivDetailInfographic = null;
@@ -46,6 +48,7 @@ public class WeatherWarningDetailActivity extends AppCompatActivity {
     private TextView tvDetailUrgency = null, tvDetailSaverity = null, tvDetailCetainty = null;
     private TextView tvDetailDescription = null, tvDetailIdentifier = null, tvDetailSender = null;
     private TextView tvDetailSenderName = null, tvDetailArea = null;
+    private ScrollView main = null;
 
 
     @Override
@@ -61,6 +64,7 @@ public class WeatherWarningDetailActivity extends AppCompatActivity {
 
         if (getIntent() != null) {
             link = getIntent().getStringExtra("EXTRA_LINK");
+            weatherBackgroundResource = getIntent().getIntExtra("EXTRA_BACKGROUND_RESOURCE", 0);
         }
 
         initView();
@@ -133,6 +137,7 @@ public class WeatherWarningDetailActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        main = findViewById(R.id.main);
         ivDetailInfographic = findViewById(R.id.iv_detail_infographic);
         tvDetailEvent = findViewById(R.id.tv_detail_event);
         tvDetailStatus = findViewById(R.id.tv_detail_status);
@@ -146,5 +151,10 @@ public class WeatherWarningDetailActivity extends AppCompatActivity {
         tvDetailSender = findViewById(R.id.tv_detail_sender);
         tvDetailSenderName = findViewById(R.id.tv_detail_sender_name);
         tvDetailArea = findViewById(R.id.tv_detail_area);
+
+        if (weatherBackgroundResource != 0) {
+            Log.i(TAG, "onCreate: nilai backround: " + weatherBackgroundResource);
+            main.setBackgroundResource(weatherBackgroundResource);
+        }
     }
 }
