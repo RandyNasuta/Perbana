@@ -240,28 +240,6 @@
                     <TextView
                         android:layout_width="120dp"
                         android:layout_height="wrap_content"
-                        android:text="Identifier"
-                        android:textColor="@color/text_gray" />
-
-                    <TextView
-                        android:id="@+id/tv_detail_identifier"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Nomor identifier"
-                        android:textColor="@color/primary_text"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="12dp">
-
-                    <TextView
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
                         android:text="Sender"
                         android:textColor="@color/text_gray" />
 
@@ -315,6 +293,28 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Area"
+                        android:textColor="@color/primary_text"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp">
+
+                    <TextView
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:text="Identifier"
+                        android:textColor="@color/text_gray" />
+
+                    <TextView
+                        android:id="@+id/tv_detail_identifier"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Nomor identifier"
                         android:textColor="@color/primary_text"
                         android:textStyle="bold" />
                 </LinearLayout>

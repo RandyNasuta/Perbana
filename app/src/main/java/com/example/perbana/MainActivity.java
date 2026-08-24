@@ -3,8 +3,10 @@ package com.example.perbana;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
 import android.net.Uri;
@@ -23,9 +25,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -43,6 +48,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.perbana.adapter.WeatherAdapter;
+import com.example.perbana.db.local.PerbanaPreferences;
 import com.example.perbana.db.model.AutoEarthquake;
 import com.example.perbana.db.model.RegionCode;
 import com.example.perbana.db.model.Weather;
@@ -60,6 +66,8 @@ import com.example.perbana.util.CsvReader;
 import com.example.perbana.util.DateUtil;
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou;
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYouListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
@@ -78,11 +86,12 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "MainActivity";
 
-    // Repository
+    // Data
     private GempaRepository gempaRepository;
     private WeatherPredictionRepository weatherPredictionRepository;
     private WeatherWarningRepository weatherWarningRepository;
     private RegionRepository regionRepository;
+    private PerbanaPreferences pref;
 
     // Variabel
     private final ArrayList<RegionCode> regionCodeList = new ArrayList<>();
@@ -91,6 +100,8 @@ public class MainActivity extends AppCompatActivity {
     private CsvReader csvReader = null;
     private int weatherBackgroundResource = 0;
     private String linkWeatherWarning = "";
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private ActivityResultLauncher<String[]> locationPermissionLauncher;
 
     //List untuk menampung data kode daerah;
     private ArrayList<RegionCode> provinceRegionList = null;
@@ -129,6 +140,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvWarningTitle = null;
     private MaterialCardView cardWeatherWarning = null;
     private TextView tvWeatherWarningListMore = null;
+    private LinearLayout llMainRegionNotChoosen = null;
+    private LinearLayout llMainRegionWeather = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +154,8 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        pref = new PerbanaPreferences(MainActivity.this);
+
         // Untuk membaca data kode wilayah
         csvReader = new CsvReader(getResources().openRawResource(R.raw.kode_wilayah));
         for (String[] data : csvReader.read()) {
@@ -150,6 +165,20 @@ public class MainActivity extends AppCompatActivity {
         initRepository();
         initView();
         initLaunched(false);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        locationPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+            Boolean fineGranted = result.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false);
+            Boolean coarseGranted = result.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false);
+
+            if (fineGranted || coarseGranted) {
+                getCurrentLocation();
+            } else {
+                Toast.makeText(MainActivity.this, "Izinkan lokasi untuk peringatan gempa", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        checkLocationPermission();
 
         main.setOnRefreshListener(() -> {
             initLaunched(true);
@@ -291,6 +320,34 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void checkLocationPermission() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            getCurrentLocation();
+        } else {
+            locationPermissionLauncher.launch(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION});
+        }
+    }
+
+    private void getCurrentLocation() {
+        Log.i(TAG, "getCurrentLocation: start");
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        fusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(this, location -> {
+                   if (location != null) {
+                       double lat = location.getLatitude();
+                       double lon = location.getLongitude();
+
+                       pref.setLatitude(lat);
+                       pref.setLongitude(lon);
+                   }
+                });
+    }
+
     private void currentChoosenRegion(String choosenRegion) {
         //Tampilkan progress bar
         llMain.setVisibility(GONE);
@@ -379,6 +436,9 @@ public class MainActivity extends AppCompatActivity {
                 //Tutup Progress Bar
                 llMain.setVisibility(VISIBLE);
                 llProgress.setVisibility(GONE);
+
+                llMainRegionNotChoosen.setVisibility(GONE);
+                llMainRegionWeather.setVisibility(VISIBLE);
             }
 
             @Override
@@ -531,6 +591,8 @@ public class MainActivity extends AppCompatActivity {
         tvWarningTitle = findViewById(R.id.tv_warning_title);
         cardWeatherWarning = findViewById(R.id.card_weather_warning);
         tvWeatherWarningListMore = findViewById(R.id.tv_weather_warning_list_more);
+        llMainRegionNotChoosen = findViewById(R.id.ll_main_region_not_choosen);
+        llMainRegionWeather = findViewById(R.id.ll_main_region_weather);
 
         //Recycler View Weather
         weatherAdapter = new WeatherAdapter(new ArrayList<Weather>());

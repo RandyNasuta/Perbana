@@ -19,6 +19,8 @@ navigationFragment = "2.9.8"
 navigationUi = "2.9.8"
 converterSimplexml = "2.9.0"
 swipeRefreshLayout = "1.1.0"
+workRuntime = "2.9.0"
+playServiceLocation = "21.0.1"
 
 [libraries]
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -41,6 +43,8 @@ navigation-fragment = { group = "androidx.navigation", name = "navigation-fragme
 navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigationUi" }
 converter-simplexml = { module = "com.squareup.retrofit2:converter-simplexml", version.ref = "converterSimplexml" }
 swipe-refresh-layout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swipeRefreshLayout" }
+work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
+play-service-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServiceLocation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

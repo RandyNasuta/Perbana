@@ -53,7 +53,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:alpha="0.8"
                     app:cardCornerRadius="25dp"
                     app:cardElevation="5dp"
                     app:cardPreventCornerOverlap="false"
@@ -68,18 +67,20 @@
                         android:gravity="center_vertical">
 
                         <LinearLayout
+                            android:id="@+id/ll_main_region_weather"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
                             android:layout_marginEnd="5dp"
-                            android:layout_weight="1">
+                            android:layout_weight="1"
+                            android:visibility="gone">
 
                             <TextView
                                 android:id="@+id/tv_main_current_place"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
-                                android:text="31\u2103"
+                                android:text="0\u2103"
                                 android:textSize="32sp" />
 
                             <TextView
@@ -95,6 +96,30 @@
                                 android:layout_height="wrap_content"
                                 android:text="10 Januari 2025 (12.00)"
                                 android:textSize="16sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/ll_main_region_not_choosen"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            tools:ignore="UseCompoundDrawables">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:layout_margin="8dp"
+                                android:src="@drawable/warning"
+                                android:contentDescription="@string/warning_image"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Daerah belum terpilih"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
                         </LinearLayout>
 
                         <ImageView

@@ -26,6 +26,7 @@ import com.example.perbana.db.model.Area;
 import com.example.perbana.db.model.Cap;
 import com.example.perbana.db.model.DetailWeatherWarning;
 import com.example.perbana.db.repository.WeatherWarningRepository;
+import com.example.perbana.util.DateUtil;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -88,7 +89,11 @@ public class WeatherWarningDetailActivity extends AppCompatActivity {
                         tvDetailEvent.setText(detailWeatherWarning.getEvent());
                         tvDetailStatus.setText(capData.getStatus());
                         tvDetailHeadline.setText(detailWeatherWarning.getHeadline());
-                        tvDetailTimeRange.setText(detailWeatherWarning.getEffective() + " - " + detailWeatherWarning.getExpires());
+
+                        String effectiveDate = DateUtil.parseDate("yyyy-MM-dd'T'HH:mm:ssXXX", "EEE, dd MMM yyyy • HH:mm 'WIB'", detailWeatherWarning.getEffective());
+                        String expiresDate = DateUtil.parseDate("yyyy-MM-dd'T'HH:mm:ssXXX", "EEE, dd MMM yyyy • HH:mm 'WIB'", detailWeatherWarning.getExpires());
+                        tvDetailTimeRange.setText(effectiveDate + " - " + expiresDate);
+
                         tvDetailUrgency.setText(detailWeatherWarning.getUrgency());
                         tvDetailSaverity.setText(detailWeatherWarning.getSeverity());
                         tvDetailCetainty.setText(detailWeatherWarning.getCertainty());

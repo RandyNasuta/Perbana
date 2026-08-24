@@ -71,4 +71,10 @@ dependencies {
 
     //Swipe Refresh Layout
     implementation(libs.swipe.refresh.layout)
+
+    //Work Manager
+    implementation(libs.work.runtime)
+
+    //Play service location
+    implementation(libs.play.service.location)
 }
