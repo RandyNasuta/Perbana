@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -38,6 +39,9 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
@@ -64,6 +68,7 @@ import com.example.perbana.presentation.weather.weather_warning_detail.WeatherWa
 import com.example.perbana.presentation.weather.weather_warning_list.WeatherWarningListActivity;
 import com.example.perbana.util.CsvReader;
 import com.example.perbana.util.DateUtil;
+import com.example.perbana.util.worker.EarthquakeWorker;
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou;
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYouListener;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -78,6 +83,7 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -165,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
         initRepository();
         initView();
         initLaunched(false);
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         locationPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
@@ -178,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        checkLocationPermission();
+        checkAllPermission();
 
         main.setOnRefreshListener(() -> {
             initLaunched(true);
@@ -320,12 +327,27 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void checkLocationPermission() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            getCurrentLocation();
-        } else {
+    private void checkAllPermission() {
+        List<String> permissionToRequest = new ArrayList<>();
+
+        //Cek izin lokasi
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            permissionToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION);
+            permissionToRequest.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+        }
+
+        //Cek izin notifikasi
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                permissionToRequest.add(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+
+        if (!permissionToRequest.isEmpty()) {
             locationPermissionLauncher.launch(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION});
+        } else {
+            getCurrentLocation();
         }
     }
 
@@ -344,8 +366,25 @@ public class MainActivity extends AppCompatActivity {
 
                        pref.setLatitude(lat);
                        pref.setLongitude(lon);
+
+                       startEarthquakeMonitoring();
                    }
                 });
+    }
+
+    private void startEarthquakeMonitoring() {
+        Log.i(TAG, "startEarthquakeMonitoring: Start");
+
+        PeriodicWorkRequest earthquakeReq = new PeriodicWorkRequest.Builder(
+                EarthquakeWorker.class,
+                15 , TimeUnit.MINUTES
+        ).build();
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                "EARTHQUAKE_MONITORING_PERBANA",
+                ExistingPeriodicWorkPolicy.KEEP,
+                earthquakeReq
+        );
     }
 
     private void currentChoosenRegion(String choosenRegion) {
