@@ -2,7 +2,13 @@ package com.example.perbana.util.worker;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
@@ -13,6 +19,8 @@ import androidx.work.WorkerParameters;
 
 import com.example.perbana.R;
 import com.example.perbana.db.local.PerbanaPreferences;
+import com.example.perbana.util.AlarmPlayer;
+import com.example.perbana.util.receiver.DismissAlarmReceiver;
 
 import org.json.JSONObject;
 
@@ -23,6 +31,7 @@ import java.net.URL;
 
 public class EarthquakeWorker extends Worker {
     private final String TAG = "EarthquakeWorker";
+    public final static String CHANNEL_ID_EARTHQUAKE = "earthquake_alert_channel";
 
     public EarthquakeWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -77,7 +86,7 @@ public class EarthquakeWorker extends Worker {
                     String title = "Peringatan Gempa (M " + magnitude + ")";
                     String message = "Lokasi: " + wilayah + " (" + Math.round(length) + " km dari lokasi Anda)";
 
-                    showNotification(title, message);
+                    showDangerNotification(title, message);
                     pref.setLastEarthquakeDate(dateTime);
                 }
             }
@@ -89,33 +98,48 @@ public class EarthquakeWorker extends Worker {
         }
     }
 
-    private void showNotification(String title, String message) {
-        NotificationManager manager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        String channelId = "earthquake_alert_channel";
+    private void showDangerNotification(String title, String message) {
+        NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+
+        AlarmPlayer.startAlarm(getApplicationContext());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationManager.deleteNotificationChannel(EarthquakeWorker.CHANNEL_ID_EARTHQUAKE);
             NotificationChannel channel = new NotificationChannel(
-                    channelId,
+                    EarthquakeWorker.CHANNEL_ID_EARTHQUAKE,
                     "Peringatan Gempa Terdekat",
                     NotificationManager.IMPORTANCE_HIGH
             );
+
             channel.enableVibration(true);
             channel.setVibrationPattern(new long[]{0, 500, 200, 500});
-            if (manager != null) {
-                manager.createNotificationChannel(channel);
+            channel.setSound(null, null);
+
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
             }
         }
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext() ,channelId)
+        int notificationId = (int) System.currentTimeMillis();
+
+        Intent dismissIntent = new Intent(getApplicationContext(), DismissAlarmReceiver.class);
+        dismissIntent.putExtra("NOTIFICATION_ID", notificationId);
+        PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), notificationId, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext() , EarthquakeWorker.CHANNEL_ID_EARTHQUAKE)
                 .setSmallIcon(R.drawable.warning)
                 .setContentTitle(title)
                 .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .setAutoCancel(true);
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setSound(null)
+                .setColor(Color.RED)
+                .setColorized(true)
+                .setOngoing(true)
+                .setAutoCancel(false)
+                .addAction(R.drawable.warning, "MATIKAN ALARM", dismissPendingIntent);
 
-        if (manager != null) {
-            manager.notify((int) System.currentTimeMillis(), builder.build());
+        if (notificationManager != null) {
+            notificationManager.notify(notificationId, builder.build());
         }
     }
 

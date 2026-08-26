@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -64,6 +66,7 @@ import com.example.perbana.db.repository.WeatherPredictionRepository;
 import com.example.perbana.db.repository.WeatherWarningRepository;
 import com.example.perbana.presentation.earthquake.earthquake_detail.EarthquakeDetailActivity;
 import com.example.perbana.presentation.earthquake.earthquake_list.EarthquakeListActivity;
+import com.example.perbana.presentation.system_info.SystemInformationActivity;
 import com.example.perbana.presentation.weather.weather_warning_detail.WeatherWarningDetailActivity;
 import com.example.perbana.presentation.weather.weather_warning_list.WeatherWarningListActivity;
 import com.example.perbana.util.CsvReader;
@@ -107,7 +110,25 @@ public class MainActivity extends AppCompatActivity {
     private int weatherBackgroundResource = 0;
     private String linkWeatherWarning = "";
     private FusedLocationProviderClient fusedLocationProviderClient;
-    private ActivityResultLauncher<String[]> locationPermissionLauncher;
+    private final ActivityResultLauncher<String[]> permissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+                Boolean fineGranted = result.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false);
+                Boolean coarseGranted = result.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false);
+                Boolean notificationGranted = result.getOrDefault(Manifest.permission.POST_NOTIFICATIONS, false);
+
+                boolean hasLocationPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                        || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+                if (fineGranted || coarseGranted || hasLocationPermission) {
+                    getCurrentLocation();
+                } else {
+                    Toast.makeText(MainActivity.this, "Izinkan lokasi untuk peringatan gempa", Toast.LENGTH_SHORT).show();
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !notificationGranted) {
+                    Toast.makeText(this, "Izinkan notifikasi untuk peringatan gempa", Toast.LENGTH_SHORT).show();
+                }
+            });
 
     //List untuk menampung data kode daerah;
     private ArrayList<RegionCode> provinceRegionList = null;
@@ -148,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvWeatherWarningListMore = null;
     private LinearLayout llMainRegionNotChoosen = null;
     private LinearLayout llMainRegionWeather = null;
+    private ImageButton btnInformation = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,17 +195,6 @@ public class MainActivity extends AppCompatActivity {
         initLaunched(false);
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
-        locationPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-            Boolean fineGranted = result.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false);
-            Boolean coarseGranted = result.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false);
-
-            if (fineGranted || coarseGranted) {
-                getCurrentLocation();
-            } else {
-                Toast.makeText(MainActivity.this, "Izinkan lokasi untuk peringatan gempa", Toast.LENGTH_SHORT).show();
-            }
-        });
 
         checkAllPermission();
 
@@ -345,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (!permissionToRequest.isEmpty()) {
-            locationPermissionLauncher.launch(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION});
+            permissionLauncher.launch(permissionToRequest.toArray(new String[0]));
         } else {
             getCurrentLocation();
         }
@@ -632,6 +643,7 @@ public class MainActivity extends AppCompatActivity {
         tvWeatherWarningListMore = findViewById(R.id.tv_weather_warning_list_more);
         llMainRegionNotChoosen = findViewById(R.id.ll_main_region_not_choosen);
         llMainRegionWeather = findViewById(R.id.ll_main_region_weather);
+        btnInformation = findViewById(R.id.btn_information);
 
         //Recycler View Weather
         weatherAdapter = new WeatherAdapter(new ArrayList<Weather>());
@@ -668,6 +680,11 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, WeatherWarningDetailActivity.class);
             intent.putExtra("EXTRA_LINK", linkWeatherWarning);
             intent.putExtra("EXTRA_BACKGROUND_RESOURCE", weatherBackgroundResource);
+            startActivity(intent);
+        });
+
+        btnInformation.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, SystemInformationActivity.class);
             startActivity(intent);
         });
     }
