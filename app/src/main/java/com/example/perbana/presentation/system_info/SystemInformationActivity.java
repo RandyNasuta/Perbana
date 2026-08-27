@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ import androidx.work.WorkManager;
 import com.example.perbana.BuildConfig;
 import com.example.perbana.R;
 import com.example.perbana.util.AlarmPlayer;
+import com.example.perbana.util.AppConstants;
 import com.example.perbana.util.receiver.DismissAlarmReceiver;
 import com.example.perbana.util.worker.EarthquakeWorker;
 import com.google.android.material.button.MaterialButton;
@@ -40,6 +42,7 @@ public class SystemInformationActivity extends AppCompatActivity {
     private TextView tvAppVersion = null;
     private MaterialButton btnTestAlarm = null;
     private MaterialButton btnForceSync = null;
+    private ScrollView main = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +62,8 @@ public class SystemInformationActivity extends AppCompatActivity {
         tvAppVersion = findViewById(R.id.tv_app_version);
         btnTestAlarm = findViewById(R.id.btn_test_alarm);
         btnForceSync = findViewById(R.id.btn_force_sync);
+        main = findViewById(R.id.main);
+        main.setBackgroundResource(AppConstants.weatherBackgroundResource);
 
         String appVersion = BuildConfig.VERSION_NAME;
         String environment = BuildConfig.ENVIRONMENT;

@@ -69,6 +69,7 @@ import com.example.perbana.presentation.earthquake.earthquake_list.EarthquakeLis
 import com.example.perbana.presentation.system_info.SystemInformationActivity;
 import com.example.perbana.presentation.weather.weather_warning_detail.WeatherWarningDetailActivity;
 import com.example.perbana.presentation.weather.weather_warning_list.WeatherWarningListActivity;
+import com.example.perbana.util.AppConstants;
 import com.example.perbana.util.CsvReader;
 import com.example.perbana.util.DateUtil;
 import com.example.perbana.util.worker.EarthquakeWorker;
@@ -107,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
     private WeatherAdapter weatherAdapter = null;
     private AlertDialog.Builder dialog = null;
     private CsvReader csvReader = null;
-    private int weatherBackgroundResource = 0;
     private String linkWeatherWarning = "";
     private FusedLocationProviderClient fusedLocationProviderClient;
     private final ActivityResultLauncher<String[]> permissionLauncher =
@@ -447,13 +447,13 @@ public class MainActivity extends AppCompatActivity {
 
                     if (cuacaCurrent.get("weather").getAsInt() == 0 || cuacaCurrent.get("weather").getAsInt() == 1) {
                         main.setBackgroundResource(R.drawable.bg_weather_sunny);
-                        weatherBackgroundResource = R.drawable.bg_weather_sunny;
+                        AppConstants.weatherBackgroundResource = R.drawable.bg_weather_sunny;
                     } else if (cuacaCurrent.get("weather").getAsInt() == 2) {
                         main.setBackgroundResource(R.drawable.bg_weather_cloudy);
-                        weatherBackgroundResource = R.drawable.bg_weather_cloudy;
+                        AppConstants.weatherBackgroundResource = R.drawable.bg_weather_cloudy;
                     } else {
                         main.setBackgroundResource(R.drawable.bg_weather_rainy);
-                        weatherBackgroundResource = R.drawable.bg_weather_rainy;
+                        AppConstants.weatherBackgroundResource = R.drawable.bg_weather_rainy;
                     }
 
                     JsonArray cuacaArray = data.getAsJsonArray("cuaca");
@@ -605,7 +605,6 @@ public class MainActivity extends AppCompatActivity {
                                 gempa.get("Shakemap").getAsString()
                         );
                         intent.putExtra("EXTRA_GEMPA", autoEarthquake);
-                        intent.putExtra("EXTRA_BACKGROUND_RESOURCE", weatherBackgroundResource);
                         startActivity(intent);
                     });
                 }
@@ -679,7 +678,6 @@ public class MainActivity extends AppCompatActivity {
         cardWeatherWarning.setOnClickListener(view -> {
             Intent intent = new Intent(MainActivity.this, WeatherWarningDetailActivity.class);
             intent.putExtra("EXTRA_LINK", linkWeatherWarning);
-            intent.putExtra("EXTRA_BACKGROUND_RESOURCE", weatherBackgroundResource);
             startActivity(intent);
         });
 

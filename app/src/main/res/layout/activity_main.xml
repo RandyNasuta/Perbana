@@ -51,8 +51,8 @@
 
                     <ImageButton
                         android:id="@+id/btn_information"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
                         android:src="@drawable/baseline_info_outline_24"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:contentDescription="Info Sistem"/>

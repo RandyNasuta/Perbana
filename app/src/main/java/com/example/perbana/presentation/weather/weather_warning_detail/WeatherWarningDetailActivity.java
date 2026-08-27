@@ -26,6 +26,7 @@ import com.example.perbana.db.model.Area;
 import com.example.perbana.db.model.Cap;
 import com.example.perbana.db.model.DetailWeatherWarning;
 import com.example.perbana.db.repository.WeatherWarningRepository;
+import com.example.perbana.util.AppConstants;
 import com.example.perbana.util.DateUtil;
 
 import retrofit2.Call;
@@ -41,7 +42,6 @@ public class WeatherWarningDetailActivity extends AppCompatActivity {
 
     //Variabel
     private String link = "";
-    private int weatherBackgroundResource = 0;
 
     //View Group
     private ImageView ivDetailInfographic = null;
@@ -65,7 +65,6 @@ public class WeatherWarningDetailActivity extends AppCompatActivity {
 
         if (getIntent() != null) {
             link = getIntent().getStringExtra("EXTRA_LINK");
-            weatherBackgroundResource = getIntent().getIntExtra("EXTRA_BACKGROUND_RESOURCE", 0);
         }
 
         initView();
@@ -156,10 +155,6 @@ public class WeatherWarningDetailActivity extends AppCompatActivity {
         tvDetailSender = findViewById(R.id.tv_detail_sender);
         tvDetailSenderName = findViewById(R.id.tv_detail_sender_name);
         tvDetailArea = findViewById(R.id.tv_detail_area);
-
-        if (weatherBackgroundResource != 0) {
-            Log.i(TAG, "onCreate: nilai backround: " + weatherBackgroundResource);
-            main.setBackgroundResource(weatherBackgroundResource);
-        }
+        main.setBackgroundResource(AppConstants.weatherBackgroundResource);
     }
 }

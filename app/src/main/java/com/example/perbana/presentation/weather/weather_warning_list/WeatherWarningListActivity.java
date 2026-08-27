@@ -3,6 +3,7 @@ package com.example.perbana.presentation.weather.weather_warning_list;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -20,6 +21,7 @@ import com.example.perbana.adapter.WeatherWarningAdapter;
 import com.example.perbana.db.model.Rss;
 import com.example.perbana.db.model.WeatherWarning;
 import com.example.perbana.db.repository.WeatherWarningRepository;
+import com.example.perbana.util.AppConstants;
 import com.example.perbana.util.DateUtil;
 
 import java.io.Serializable;
@@ -83,6 +85,7 @@ public class WeatherWarningListActivity extends AppCompatActivity {
         rvWeatherWarningList = findViewById(R.id.rv_weather_warning_list);
         tvWeatherWarningLastDate = findViewById(R.id.tv_weather_warning_last_date);
         main = findViewById(R.id.main);
+        main.setBackgroundResource(AppConstants.weatherBackgroundResource);
 
         adapter = new WeatherWarningAdapter(weatherWarningList, WeatherWarningListActivity.this);
         rvWeatherWarningList.setAdapter(adapter);

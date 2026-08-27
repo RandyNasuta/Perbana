@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,6 +39,7 @@ import com.example.perbana.adapter.EarthquakeFeltAdapter;
 import com.example.perbana.db.model.Earthquake;
 import com.example.perbana.db.model.EarthquakeFelt;
 import com.example.perbana.db.repository.GempaRepository;
+import com.example.perbana.util.AppConstants;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -58,6 +60,9 @@ public class EarthquakeListActivity extends AppCompatActivity {
     //Adapter
     private EarthquakeAdapter earthquakeAdapter;
     private EarthquakeFeltAdapter earthquakeFeltAdapter;
+
+    //View
+    private NestedScrollView main = null;
 
     //View group Earthquake
     private LinearLayout llHeaderEarthquakeList;
@@ -129,6 +134,7 @@ public class EarthquakeListActivity extends AppCompatActivity {
     }
 
     private void initView(){
+        main = findViewById(R.id.main);
         llHeaderEarthquakeList = findViewById(R.id.ll_header_earthquake_list);
         llExpandableEarthquakeList = findViewById(R.id.layout_expandable_earthquake_list);
         ivArrowEarthquakeList = findViewById(R.id.iv_arrow_earthquake_list);
@@ -136,6 +142,8 @@ public class EarthquakeListActivity extends AppCompatActivity {
         rvEarthquake.setLayoutManager(new LinearLayoutManager(this));
         earthquakeAdapter = new EarthquakeAdapter(EarthquakeListActivity.this, earthquakeList);
         rvEarthquake.setAdapter(earthquakeAdapter);
+
+        main.setBackgroundResource(AppConstants.weatherBackgroundResource);
 
         llHeaderEarthquakeListFelt = findViewById(R.id.ll_header_earthquake_list_felt);
         llExpandableEarthquakeListFelt = findViewById(R.id.layout_expandable_earthquake_list_felt);

@@ -26,6 +26,7 @@ import com.bumptech.glide.request.target.Target;
 import com.example.perbana.MainActivity;
 import com.example.perbana.R;
 import com.example.perbana.db.model.AutoEarthquake;
+import com.example.perbana.util.AppConstants;
 
 import java.util.Objects;
 
@@ -34,7 +35,6 @@ public class EarthquakeDetailActivity extends AppCompatActivity {
 
     //Variabel
     private AutoEarthquake autoEarthquake = null;
-    private int weatherBackgroundResource = 0;
 
     //View Group
     private NestedScrollView activityEarthquakeDetail = null;
@@ -63,7 +63,6 @@ public class EarthquakeDetailActivity extends AppCompatActivity {
 
         if (getIntent() != null) {
             autoEarthquake = getIntent().getParcelableExtra("EXTRA_GEMPA");
-            weatherBackgroundResource = getIntent().getIntExtra("EXTRA_BACKGROUND_RESOURCE", 0);
         }
 
         initView();
@@ -125,9 +124,6 @@ public class EarthquakeDetailActivity extends AppCompatActivity {
             tvDetailStatus.setBackgroundResource(R.drawable.bg_badge_soft);
         }
 
-        if (weatherBackgroundResource != 0) {
-            Log.i(TAG, "onCreate: nilai backround: " + weatherBackgroundResource);
-            activityEarthquakeDetail.setBackgroundResource(weatherBackgroundResource);
-        }
+        activityEarthquakeDetail.setBackgroundResource(AppConstants.weatherBackgroundResource);
     }
 }

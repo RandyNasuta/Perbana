@@ -10,6 +10,7 @@
     tools:context=".presentation.weather.weather_warning_list.WeatherWarningListActivity">
 
     <LinearLayout
+        android:id="@+id/ll_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -21,7 +22,7 @@
             android:padding="10dp"
             android:layout_gravity="center_horizontal"
             android:text="Waktu pemutakhiran data: Fri, 14 Aug 2026 02:30:10 +0000"
-            android:textColor="@color/primary_text"
+            android:textColor="@color/white"
             android:background="@drawable/bg_badge_soft"
             android:textStyle="bold"
             android:layout_marginTop="12dp"
