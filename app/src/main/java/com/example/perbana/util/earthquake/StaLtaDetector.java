@@ -13,6 +13,10 @@ public class StaLtaDetector {
     private final int staWindowSize;
     private final int ltaWindowSize;
     private final double triggerThreshold;
+    private int consecutiveTriggerCount = 0;
+    private final int requiredConsecutiveTriggers = 60;
+    private boolean isCalibrated = false;
+
 
     private final Queue<Double> staQueue = new LinkedList<>();
     private final Queue<Double> ltaQueue = new LinkedList<>();
@@ -50,8 +54,11 @@ public class StaLtaDetector {
             ltaSum -= ltaQueue.poll();
         }
 
-        //Jangan lakukan deteksi sebelum kalibrasi LTA awal penuh (membutuhan waktu sesuai LTA window)
-        if (ltaQueue.size() < ltaWindowSize) {
+        if (!isCalibrated && ltaQueue.size() >= ltaWindowSize) {
+            isCalibrated = true;
+        }
+
+        if (!isCalibrated) {
             return false;
         }
 
@@ -64,6 +71,21 @@ public class StaLtaDetector {
 
         double ratio = sta / lta;
 
-        return ratio >= triggerThreshold;
+        if (ratio >= triggerThreshold) {
+            consecutiveTriggerCount++;
+        } else {
+            consecutiveTriggerCount = Math.max(0, consecutiveTriggerCount-  1);
+        }
+
+        if (consecutiveTriggerCount >= requiredConsecutiveTriggers) {
+            consecutiveTriggerCount = 0;
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean isCalibrated() {
+        return isCalibrated;
     }
 }

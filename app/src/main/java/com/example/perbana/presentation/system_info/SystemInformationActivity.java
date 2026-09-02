@@ -13,6 +13,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -31,6 +32,8 @@ import com.example.perbana.BuildConfig;
 import com.example.perbana.R;
 import com.example.perbana.util.AlarmPlayer;
 import com.example.perbana.util.AppConstants;
+import com.example.perbana.util.earthquake.EarthquakeSensorDetector;
+import com.example.perbana.util.earthquake.StaLtaDetector;
 import com.example.perbana.util.receiver.DismissAlarmReceiver;
 import com.example.perbana.util.worker.EarthquakeWorker;
 import com.google.android.material.button.MaterialButton;
@@ -44,6 +47,12 @@ public class SystemInformationActivity extends AppCompatActivity {
     private MaterialButton btnForceSync = null;
     private ScrollView main = null;
 
+    //Variabel
+    private EarthquakeSensorDetector sensorDetector;
+    private StaLtaDetector staLtaDetector;
+    private boolean isCooldown = false;
+    private boolean hasShownCalibrationTest = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +65,8 @@ public class SystemInformationActivity extends AppCompatActivity {
         });
 
         initView();
+
+        setupSensoringTesting();
     }
 
     private void initView() {
@@ -79,6 +90,50 @@ public class SystemInformationActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    private void setupSensoringTesting() {
+        sensorDetector = new EarthquakeSensorDetector(this);
+
+        //Sensor_DELAY_GAME berjalan -50Hz.
+        //STA: 50 sample (1 detik). LTA: 500 sample (10 detik). Threshold: rasio 4.0x lipat
+        staLtaDetector = new StaLtaDetector(50, 500, 8.0);
+
+        sensorDetector.startListening(new EarthquakeSensorDetector.OnVibrationDetectedListener() {
+            @Override
+            public void onVibrationDetected(double acceleration, float x, float y, float z) {
+
+                boolean isVerticalLift = Math.abs(z) > 1.2;
+
+                //Hindari getaran micro / noise sensor murni di bawah 0.2 m/s2 masuk perhitungan
+                if (acceleration < 2.2 || isVerticalLift) {
+                    acceleration = 0.0;
+                }
+
+                if (!hasShownCalibrationTest && staLtaDetector.isCalibrated()) {
+                    hasShownCalibrationTest = true;
+                    runOnUiThread(() -> {
+                        Toast.makeText(SystemInformationActivity.this, "Kalibrasi selesai! Sensor gempa siap", Toast.LENGTH_SHORT).show();
+                    });
+                }
+                boolean isEarthquake = staLtaDetector.processAccelaration(acceleration);
+
+                if (isEarthquake && !isCooldown) {
+                    isCooldown = true;
+                    Log.w(TAG, "Potensi gempa terdeteksi!");
+
+                    runOnUiThread(() -> {
+                        Toast.makeText(SystemInformationActivity.this, "GEMPA TERDETEKSI!", Toast.LENGTH_SHORT).show();
+                        triggerNotification();
+
+                        new android.os.Handler().postDelayed(() -> {
+                            isCooldown = false;
+                            Toast.makeText(SystemInformationActivity.this, "Sensor siap deteksi kembali", Toast.LENGTH_SHORT).show();
+                        }, 15000);
+                    });
+                }
+            }
+        });
     }
 
     private void triggerNotification() {
@@ -124,6 +179,14 @@ public class SystemInformationActivity extends AppCompatActivity {
 
         if (notificationManager != null) {
             notificationManager.notify(notificationId, builder.build());
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (sensorDetector != null) {
+            sensorDetector.stopListening();
         }
     }
 }
