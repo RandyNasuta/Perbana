@@ -103,11 +103,17 @@ public class SystemInformationActivity extends AppCompatActivity {
             @Override
             public void onVibrationDetected(double acceleration, float x, float y, float z) {
 
-                boolean isVerticalLift = Math.abs(z) > 1.2;
 
                 //Hindari getaran micro / noise sensor murni di bawah 0.2 m/s2 masuk perhitungan
-                if (acceleration < 2.2 || isVerticalLift) {
+                if (acceleration > 0.5) {
+                    Log.i(TAG, "onVibrationDetected: Raw Accel: " + acceleration + " | x: " + x + " | y: " + y + " | z: " + z);
+                }
+
+                boolean isLiftingAction = (Math.abs(z) > 1.0 && Math.abs(x) < 0.8 && Math.abs(y) < 0.8);
+                if (acceleration < 2.0 || isLiftingAction) {
                     acceleration = 0.0;
+                } else {
+                    Log.i(TAG, "Lolos filter: nilai = " + acceleration);
                 }
 
                 if (!hasShownCalibrationTest && staLtaDetector.isCalibrated()) {

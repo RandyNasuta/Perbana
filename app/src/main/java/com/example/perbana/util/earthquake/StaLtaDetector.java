@@ -1,5 +1,7 @@
 package com.example.perbana.util.earthquake;
 
+import android.util.Log;
+
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -16,6 +18,7 @@ public class StaLtaDetector {
     private int consecutiveTriggerCount = 0;
     private final int requiredConsecutiveTriggers = 60;
     private boolean isCalibrated = false;
+    private final String TAG = "StaLtaDetector";
 
 
     private final Queue<Double> staQueue = new LinkedList<>();
@@ -40,12 +43,21 @@ public class StaLtaDetector {
         //Linear Acceleration sudah tanpa gravitasi, kita ambil nilai absolutnya
         double val = Math.abs(acceleration);
 
+        //Filter melempar hp
+        if (!isCalibrated && val > 2.5) {
+            resetDetector();
+            return false;
+        }
+
         // Hitung Moving Average untuk STA
         staQueue.add(val);
         staSum += val;
         if (staQueue.size() > staWindowSize) {
             staSum -= staQueue.poll();
         }
+
+        //Batas nilai ekstrem yang masuk ke LTA
+        double ltaVal = Math.min(val, 3.0);
 
         // Hitung Moving Average untuk LTA
         ltaQueue.add(val);
@@ -62,6 +74,12 @@ public class StaLtaDetector {
             return false;
         }
 
+        //Reset detector ketika ada hantaman instan yang ekstrem
+        if (val > 6.0) {
+            resetDetector();
+            return false;
+        }
+
         double sta = staSum / staWindowSize;
         double lta = ltaSum / ltaWindowSize;
 
@@ -71,6 +89,8 @@ public class StaLtaDetector {
 
         double ratio = sta / lta;
 
+        Log.i(TAG, "processAccelaration: Ratio: " + ratio + " | Threshold: " + triggerThreshold + " | Count: " + consecutiveTriggerCount);
+
         if (ratio >= triggerThreshold) {
             consecutiveTriggerCount++;
         } else {
@@ -79,10 +99,20 @@ public class StaLtaDetector {
 
         if (consecutiveTriggerCount >= requiredConsecutiveTriggers) {
             consecutiveTriggerCount = 0;
+            resetDetector();
             return true;
         }
 
         return false;
+    }
+
+    public void resetDetector() {
+        staQueue.clear();
+        ltaQueue.clear();
+        staSum = 0.0;
+        ltaSum = 0.0;
+        isCalibrated = false;
+        consecutiveTriggerCount = 0;
     }
 
     public boolean isCalibrated() {
