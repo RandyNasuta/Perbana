@@ -96,8 +96,8 @@ public class SystemInformationActivity extends AppCompatActivity {
         sensorDetector = new EarthquakeSensorDetector(this);
 
         //Sensor_DELAY_GAME berjalan -50Hz.
-        //STA: 50 sample (1 detik). LTA: 500 sample (10 detik). Threshold: rasio 4.0x lipat
-        staLtaDetector = new StaLtaDetector(50, 500, 8.0);
+        //STA: 50 sample (1 detik). LTA: 500 sample (10 detik)
+        staLtaDetector = new StaLtaDetector(50, 500, 15.0);
 
         sensorDetector.startListening(new EarthquakeSensorDetector.OnVibrationDetectedListener() {
             @Override
@@ -109,8 +109,8 @@ public class SystemInformationActivity extends AppCompatActivity {
                     Log.i(TAG, "onVibrationDetected: Raw Accel: " + acceleration + " | x: " + x + " | y: " + y + " | z: " + z);
                 }
 
-                boolean isLiftingAction = (Math.abs(z) > 1.0 && Math.abs(x) < 0.8 && Math.abs(y) < 0.8);
-                if (acceleration < 2.0 || isLiftingAction) {
+//                boolean isHandlingAction = (Math.abs(x) > 0.3 || Math.abs(y) > 0.3 || Math.abs(z) < 0.4);
+                if (acceleration < 2.0) {
                     acceleration = 0.0;
                 } else {
                     Log.i(TAG, "Lolos filter: nilai = " + acceleration);
@@ -119,6 +119,7 @@ public class SystemInformationActivity extends AppCompatActivity {
                 if (!hasShownCalibrationTest && staLtaDetector.isCalibrated()) {
                     hasShownCalibrationTest = true;
                     runOnUiThread(() -> {
+                        Log.i(TAG, "Kalibrasi selesai! Sensor gempa siap");
                         Toast.makeText(SystemInformationActivity.this, "Kalibrasi selesai! Sensor gempa siap", Toast.LENGTH_SHORT).show();
                     });
                 }

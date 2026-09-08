@@ -16,7 +16,7 @@ public class StaLtaDetector {
     private final int ltaWindowSize;
     private final double triggerThreshold;
     private int consecutiveTriggerCount = 0;
-    private final int requiredConsecutiveTriggers = 60;
+    private final int requiredConsecutiveTriggers = 125; //butuh total sample 125 buah untuk valiasi gempa
     private boolean isCalibrated = false;
     private final String TAG = "StaLtaDetector";
 
@@ -40,11 +40,17 @@ public class StaLtaDetector {
     }
 
     public boolean processAccelaration(double acceleration) {
-        //Linear Acceleration sudah tanpa gravitasi, kita ambil nilai absolutnya
+        //Linear Acceleration sudah tanpa gravitasi, kita ambil nilai absol utnya
         double val = Math.abs(acceleration);
 
         //Filter melempar hp
         if (!isCalibrated && val > 2.5) {
+            resetDetector();
+            return false;
+        }
+
+        //Reset detector ketika ada hantaman instan yang ekstrem
+        if (val > 14.0) {
             resetDetector();
             return false;
         }
@@ -56,16 +62,40 @@ public class StaLtaDetector {
             staSum -= staQueue.poll();
         }
 
-        //Batas nilai ekstrem yang masuk ke LTA
-        double ltaVal = Math.min(val, 3.0);
+        //Sta saat ini
+        double sta = staSum / staWindowSize;
 
-        // Hitung Moving Average untuk LTA
-        ltaQueue.add(val);
-        ltaSum += val;
-        if (ltaQueue.size() > ltaWindowSize) {
-            ltaSum -= ltaQueue.poll();
+        //lta saat ini
+        double lta = 0.1;
+        if (!ltaQueue.isEmpty()) {
+            lta = ltaSum / ltaQueue.size();
         }
 
+        if (lta < 0.1) {
+            lta = 0.1;
+        }
+
+        //ratio saat ini
+        double ratio = sta / lta;
+
+        boolean isSpiking = false;
+        if (ratio >= triggerThreshold) {
+            isSpiking = true;
+        }
+
+        if (!isSpiking || !isCalibrated) {
+            //Batas nilai ekstrem yang masuk ke LTA
+            double ltaVal = Math.min(val, 3.0);
+
+            // Hitung Moving Average untuk LTA
+            ltaQueue.add(ltaVal);
+            ltaSum += ltaVal;
+            if (ltaQueue.size() > ltaWindowSize) {
+                ltaSum -= ltaQueue.poll();
+            }
+        }
+
+        //Cek status kalibrasi awal
         if (!isCalibrated && ltaQueue.size() >= ltaWindowSize) {
             isCalibrated = true;
         }
@@ -74,29 +104,15 @@ public class StaLtaDetector {
             return false;
         }
 
-        //Reset detector ketika ada hantaman instan yang ekstrem
-        if (val > 6.0) {
-            resetDetector();
-            return false;
-        }
-
-        double sta = staSum / staWindowSize;
-        double lta = ltaSum / ltaWindowSize;
-
-        if (lta < 0.01) {
-            lta = 0.01;
-        }
-
-        double ratio = sta / lta;
-
         Log.i(TAG, "processAccelaration: Ratio: " + ratio + " | Threshold: " + triggerThreshold + " | Count: " + consecutiveTriggerCount);
 
-        if (ratio >= triggerThreshold) {
+        if (isSpiking) {
             consecutiveTriggerCount++;
         } else {
-            consecutiveTriggerCount = Math.max(0, consecutiveTriggerCount-  1);
+            consecutiveTriggerCount = 0;
         }
 
+        //Validasi gempa terdeteksi
         if (consecutiveTriggerCount >= requiredConsecutiveTriggers) {
             consecutiveTriggerCount = 0;
             resetDetector();
@@ -111,8 +127,8 @@ public class StaLtaDetector {
         ltaQueue.clear();
         staSum = 0.0;
         ltaSum = 0.0;
-        isCalibrated = false;
         consecutiveTriggerCount = 0;
+        isCalibrated = true;
     }
 
     public boolean isCalibrated() {
