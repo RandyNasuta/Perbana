@@ -39,6 +39,25 @@ public class StaLtaDetector {
         this.triggerThreshold = triggerThreshold;
     }
 
+    //Status kalibrasi
+    public enum CalibrationState {
+        NOT_CALIBRATED,
+        LOADING,
+        CALIBRATED
+    }
+
+    private CalibrationState calibrationState = CalibrationState.NOT_CALIBRATED;
+
+    public CalibrationState getCalibrationState() {
+        if (isCalibrated) {
+            return CalibrationState.CALIBRATED;
+        } else if (!ltaQueue.isEmpty()) {
+            return CalibrationState.LOADING;
+        } else {
+            return CalibrationState.NOT_CALIBRATED;
+        }
+    }
+
     public boolean processAccelaration(double acceleration) {
         //Linear Acceleration sudah tanpa gravitasi, kita ambil nilai absol utnya
         double val = Math.abs(acceleration);
@@ -129,6 +148,7 @@ public class StaLtaDetector {
         ltaSum = 0.0;
         consecutiveTriggerCount = 0;
         isCalibrated = true;
+        calibrationState = CalibrationState.NOT_CALIBRATED;
     }
 
     public boolean isCalibrated() {

@@ -21,6 +21,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.example.perbana.BaseActivity;
 import com.example.perbana.R;
 import com.example.perbana.db.model.Area;
 import com.example.perbana.db.model.Cap;
@@ -33,7 +34,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class WeatherWarningDetailActivity extends AppCompatActivity {
+public class WeatherWarningDetailActivity extends BaseActivity {
 
     private final String TAG = "WeatherWarningDetailActivity";
 
@@ -140,7 +141,8 @@ public class WeatherWarningDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void initView() {
+    @Override
+    protected void initView() {
         main = findViewById(R.id.main);
         ivDetailInfographic = findViewById(R.id.iv_detail_infographic);
         tvDetailEvent = findViewById(R.id.tv_detail_event);

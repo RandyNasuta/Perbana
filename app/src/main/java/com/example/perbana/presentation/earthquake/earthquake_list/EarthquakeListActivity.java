@@ -24,6 +24,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -32,6 +33,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.example.perbana.BaseActivity;
 import com.example.perbana.MainActivity;
 import com.example.perbana.R;
 import com.example.perbana.adapter.EarthquakeAdapter;
@@ -50,7 +52,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class EarthquakeListActivity extends AppCompatActivity {
+public class EarthquakeListActivity extends BaseActivity {
     private final String TAG = "EarthquakeListActivity";
 
     //Variabel
@@ -62,7 +64,7 @@ public class EarthquakeListActivity extends AppCompatActivity {
     private EarthquakeFeltAdapter earthquakeFeltAdapter;
 
     //View
-    private NestedScrollView main = null;
+    private SwipeRefreshLayout main = null;
 
     //View group Earthquake
     private LinearLayout llHeaderEarthquakeList;
@@ -93,6 +95,12 @@ public class EarthquakeListActivity extends AppCompatActivity {
 
         initView();
         initRepository();
+
+        main.setOnRefreshListener(() -> {
+            getEarthquakeList();
+            getEarthquakeFeltList();
+            main.setRefreshing(false);
+        });
 
         //Buka tutup list earthquake
         llHeaderEarthquakeList.setOnClickListener(view -> {
@@ -133,7 +141,8 @@ public class EarthquakeListActivity extends AppCompatActivity {
         });
     }
 
-    private void initView(){
+    @Override
+    protected void initView(){
         main = findViewById(R.id.main);
         llHeaderEarthquakeList = findViewById(R.id.ll_header_earthquake_list);
         llExpandableEarthquakeList = findViewById(R.id.layout_expandable_earthquake_list);
@@ -157,6 +166,11 @@ public class EarthquakeListActivity extends AppCompatActivity {
     private void initRepository() {
         gempaRepository = new GempaRepository();
 
+        getEarthquakeList();
+        getEarthquakeFeltList();
+    }
+
+    private void getEarthquakeList() {
         gempaRepository.getEarthquakeList(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
@@ -195,7 +209,9 @@ public class EarthquakeListActivity extends AppCompatActivity {
                 Log.e(TAG, "onFailure: error saat memanggil api auto gempa: " + t.getMessage());
             }
         });
+    }
 
+    private void getEarthquakeFeltList() {
         gempaRepository.getEarthquakeFeltList(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {

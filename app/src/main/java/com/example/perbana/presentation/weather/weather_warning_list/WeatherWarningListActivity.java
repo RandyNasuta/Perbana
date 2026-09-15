@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.example.perbana.BaseActivity;
 import com.example.perbana.MainActivity;
 import com.example.perbana.R;
 import com.example.perbana.adapter.WeatherWarningAdapter;
@@ -32,7 +33,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class WeatherWarningListActivity extends AppCompatActivity {
+public class WeatherWarningListActivity extends BaseActivity {
     private final String TAG = "WeatherWarningListActivity";
 
     //Repository
@@ -81,7 +82,8 @@ public class WeatherWarningListActivity extends AppCompatActivity {
         });
     }
 
-    private void initView() {
+    @Override
+    protected void initView() {
         rvWeatherWarningList = findViewById(R.id.rv_weather_warning_list);
         tvWeatherWarningLastDate = findViewById(R.id.tv_weather_warning_last_date);
         main = findViewById(R.id.main);

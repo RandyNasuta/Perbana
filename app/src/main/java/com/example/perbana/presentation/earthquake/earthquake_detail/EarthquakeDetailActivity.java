@@ -23,6 +23,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.example.perbana.BaseActivity;
 import com.example.perbana.MainActivity;
 import com.example.perbana.R;
 import com.example.perbana.db.model.AutoEarthquake;
@@ -30,7 +31,7 @@ import com.example.perbana.util.AppConstants;
 
 import java.util.Objects;
 
-public class EarthquakeDetailActivity extends AppCompatActivity {
+public class EarthquakeDetailActivity extends BaseActivity {
     private final String TAG = "EarthquakeDetailActivity";
 
     //Variabel
@@ -68,7 +69,8 @@ public class EarthquakeDetailActivity extends AppCompatActivity {
         initView();
     }
 
-    private void initView() {
+    @Override
+    protected void initView() {
         activityEarthquakeDetail = findViewById(R.id.main);
         ivDetailShakemap = findViewById(R.id.iv_detail_shakemap);
         tvDetailMagnitude = findViewById(R.id.tv_detail_magnitude);
