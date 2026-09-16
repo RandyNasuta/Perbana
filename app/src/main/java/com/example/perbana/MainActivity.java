@@ -28,11 +28,9 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -72,6 +70,7 @@ import com.example.perbana.presentation.weather.weather_warning_list.WeatherWarn
 import com.example.perbana.util.AppConstants;
 import com.example.perbana.util.CsvReader;
 import com.example.perbana.util.DateUtil;
+import com.example.perbana.util.service.EarthquakeForegroundService;
 import com.example.perbana.util.worker.EarthquakeWorker;
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou;
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYouListener;
@@ -182,7 +181,21 @@ public class MainActivity extends BaseActivity {
             return insets;
         });
 
+
         pref = new PerbanaPreferences(MainActivity.this);
+
+        if (!pref.getInitiateEarthquakeSensor()) {
+            Intent intent = new Intent(MainActivity.this, EarthquakeForegroundService.class);
+            intent.setAction(EarthquakeForegroundService.ACTION_START);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent);
+            } else {
+                startService(intent);
+            }
+
+            pref.setInitiateEarthquakeSensor(true);
+        }
 
         // Untuk membaca data kode wilayah
         csvReader = new CsvReader(getResources().openRawResource(R.raw.kode_wilayah));

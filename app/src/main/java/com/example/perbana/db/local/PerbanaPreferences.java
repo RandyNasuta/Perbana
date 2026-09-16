@@ -13,6 +13,7 @@ public class PerbanaPreferences {
     private static final String KEY_LATITUDE = "key_latitude";
     private static final String KEY_LONGITUDE = "key_longitude";
     private static final String KEY_LAST_EARTHQUAKE_DATE = "key_last_gempa_date";
+    private static final String KEY_INITIATE_EARTHQUAKE_SENSOR = "key_initiate_earthquake_sensor";
 
     public PerbanaPreferences(Context context) {
         pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
@@ -39,6 +40,11 @@ public class PerbanaPreferences {
         editor.apply();
     }
 
+    public void setInitiateEarthquakeSensor(boolean isInitiate) {
+        editor.putBoolean(KEY_INITIATE_EARTHQUAKE_SENSOR, isInitiate);
+        editor.apply();
+    }
+
     public String getKeyRegionCode() {
         return pref.getString(KEY_REGION_CODE, "");
     }
@@ -53,5 +59,9 @@ public class PerbanaPreferences {
 
     public String getLastEarthquakeDate() {
         return pref.getString(KEY_LAST_EARTHQUAKE_DATE, "");
+    }
+
+    public boolean getInitiateEarthquakeSensor() {
+        return pref.getBoolean(KEY_INITIATE_EARTHQUAKE_SENSOR, false);
     }
 }

@@ -15,12 +15,16 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -36,6 +40,7 @@ import com.example.perbana.util.AppConstants;
 import com.example.perbana.util.earthquake.EarthquakeSensorDetector;
 import com.example.perbana.util.earthquake.StaLtaDetector;
 import com.example.perbana.util.receiver.DismissAlarmReceiver;
+import com.example.perbana.util.service.EarthquakeForegroundService;
 import com.example.perbana.util.worker.EarthquakeWorker;
 import com.google.android.material.button.MaterialButton;
 
@@ -47,6 +52,7 @@ public class SystemInformationActivity extends BaseActivity {
     private MaterialButton btnTestAlarm = null;
     private MaterialButton btnForceSync = null;
     private ScrollView main = null;
+    private SwitchCompat switchEarthquakeSensor = null;
 
     //Variabel
     private EarthquakeSensorDetector sensorDetector;
@@ -75,6 +81,7 @@ public class SystemInformationActivity extends BaseActivity {
         tvAppVersion = findViewById(R.id.tv_app_version);
         btnTestAlarm = findViewById(R.id.btn_test_alarm);
         btnForceSync = findViewById(R.id.btn_force_sync);
+        switchEarthquakeSensor = findViewById(R.id.switch_earthquake_sensor);
         main = findViewById(R.id.main);
         main.setBackgroundResource(AppConstants.weatherBackgroundResource);
 
@@ -91,7 +98,29 @@ public class SystemInformationActivity extends BaseActivity {
             Toast.makeText(this, "Worker berhasil dipicu!", Toast.LENGTH_SHORT).show();
         });
 
+        switchEarthquakeSensor.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean isChecked) {
+                Intent intent = new Intent(SystemInformationActivity.this, EarthquakeForegroundService.class);
+                if (isChecked) {
+                    intent.setAction(EarthquakeForegroundService.ACTION_START);
 
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(intent);
+                    } else {
+                        startService(intent);
+                    }
+                } else {
+                    intent.setAction(EarthquakeForegroundService.ACTION_STOP);
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(intent);
+                    } else {
+                        startService(intent);
+                    }
+                }
+            }
+        });
     }
 
     @Override
