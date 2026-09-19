@@ -16,7 +16,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 
-import com.example.perbana.presentation.system_info.SystemInformationActivity;
 import com.example.perbana.util.AlarmPlayer;
 import com.example.perbana.util.earthquake.EarthquakeSensorDetector;
 import com.example.perbana.util.earthquake.StaLtaDetector;
@@ -35,12 +34,12 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);
-        setupSensoringTesting();
+        setupSensoring();
     }
 
     protected abstract void initView();
 
-    protected void setupSensoringTesting() {
+    protected void setupSensoring() {
         sensorDetector = new EarthquakeSensorDetector(this);
 
         //Sensor_DELAY_GAME berjalan -50Hz.
@@ -52,41 +51,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             public void onVibrationDetected(double acceleration, float x, float y, float z) {
 
 
-                //Hindari getaran micro / noise sensor murni di bawah 0.2 m/s2 masuk perhitungan
-                if (acceleration > 0.5) {
-                    Log.i(TAG, "onVibrationDetected: Raw Accel: " + acceleration + " | x: " + x + " | y: " + y + " | z: " + z);
-                }
 
-//                boolean isHandlingAction = (Math.abs(x) > 0.3 || Math.abs(y) > 0.3 || Math.abs(z) < 0.4);
-                if (acceleration < 2.0) {
-                    acceleration = 0.0;
-                } else {
-                    Log.i(TAG, "Lolos filter: nilai = " + acceleration);
-                }
-
-                if (!hasShownCalibrationTest && staLtaDetector.isCalibrated()) {
-                    hasShownCalibrationTest = true;
-                    runOnUiThread(() -> {
-                        Log.i(TAG, "Kalibrasi selesai! Sensor gempa siap");
-                        Toast.makeText(BaseActivity.this, "Kalibrasi selesai! Sensor gempa siap", Toast.LENGTH_SHORT).show();
-                    });
-                }
-                boolean isEarthquake = staLtaDetector.processAccelaration(acceleration);
-
-                if (isEarthquake && !isCooldown) {
-                    isCooldown = true;
-                    Log.w(TAG, "Potensi gempa terdeteksi!");
-
-                    runOnUiThread(() -> {
-                        Toast.makeText(BaseActivity.this, "GEMPA TERDETEKSI!", Toast.LENGTH_SHORT).show();
-                        triggerNotification();
-
-                        new android.os.Handler().postDelayed(() -> {
-                            isCooldown = false;
-                            Toast.makeText(BaseActivity.this, "Sensor siap deteksi kembali", Toast.LENGTH_SHORT).show();
-                        }, 15000);
-                    });
-                }
             }
         });
     }

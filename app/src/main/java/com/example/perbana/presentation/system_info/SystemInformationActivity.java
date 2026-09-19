@@ -1,31 +1,20 @@
 package com.example.perbana.presentation.system_info;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.ContentResolver;
-import android.content.Context;
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import android.content.Intent;
-import android.graphics.Color;
-import android.media.AudioAttributes;
-import android.media.AudioManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.core.app.NotificationCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -34,12 +23,10 @@ import androidx.work.WorkManager;
 
 import com.example.perbana.BaseActivity;
 import com.example.perbana.BuildConfig;
+import com.example.perbana.MainActivity;
 import com.example.perbana.R;
-import com.example.perbana.util.AlarmPlayer;
+import com.example.perbana.db.local.PerbanaPreferences;
 import com.example.perbana.util.AppConstants;
-import com.example.perbana.util.earthquake.EarthquakeSensorDetector;
-import com.example.perbana.util.earthquake.StaLtaDetector;
-import com.example.perbana.util.receiver.DismissAlarmReceiver;
 import com.example.perbana.util.service.EarthquakeForegroundService;
 import com.example.perbana.util.worker.EarthquakeWorker;
 import com.google.android.material.button.MaterialButton;
@@ -55,10 +42,11 @@ public class SystemInformationActivity extends BaseActivity {
     private SwitchCompat switchEarthquakeSensor = null;
 
     //Variabel
-    private EarthquakeSensorDetector sensorDetector;
-    private StaLtaDetector staLtaDetector;
-    private boolean isCooldown = false;
-    private boolean hasShownCalibrationTest = false;
+//    private EarthquakeSensorDetector sensorDetector;
+//    private StaLtaDetector staLtaDetector;
+//    private boolean isCooldown = false;
+//    private boolean hasShownCalibrationTest = false;
+    private PerbanaPreferences pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +59,22 @@ public class SystemInformationActivity extends BaseActivity {
             return insets;
         });
 
+        pref = new PerbanaPreferences(SystemInformationActivity.this);
+
         initView();
 
-        setupSensoringTesting();
+        setupSensoring();
+
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                Intent intent = new Intent(SystemInformationActivity.this, MainActivity.class);
+                intent.setFlags(FLAG_ACTIVITY_CLEAR_TASK | FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }
+        };
+
+        getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     @Override
@@ -98,9 +99,24 @@ public class SystemInformationActivity extends BaseActivity {
             Toast.makeText(this, "Worker berhasil dipicu!", Toast.LENGTH_SHORT).show();
         });
 
+        boolean isSensorActive = pref.getInitiateEarthquakeSensor();
+        switchEarthquakeSensor.setChecked(isSensorActive);
+
+        if (isSensorActive) {
+            Intent intent = new Intent(SystemInformationActivity.this, EarthquakeForegroundService.class);
+            intent.setAction(EarthquakeForegroundService.ACTION_START);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent);
+            } else {
+                startService(intent);
+            }
+        }
+
         switchEarthquakeSensor.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(@NonNull CompoundButton compoundButton, boolean isChecked) {
+                pref.setInitiateEarthquakeSensor(isChecked);
+
                 Intent intent = new Intent(SystemInformationActivity.this, EarthquakeForegroundService.class);
                 if (isChecked) {
                     intent.setAction(EarthquakeForegroundService.ACTION_START);
@@ -112,12 +128,7 @@ public class SystemInformationActivity extends BaseActivity {
                     }
                 } else {
                     intent.setAction(EarthquakeForegroundService.ACTION_STOP);
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        startForegroundService(intent);
-                    } else {
-                        startService(intent);
-                    }
+                    startService(intent);
                 }
             }
         });

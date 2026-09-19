@@ -37,6 +37,8 @@ public class EarthquakeForegroundService extends Service {
     private boolean isCoolDown = false;
     private StaLtaDetector.CalibrationState lastState = null;
     private Handler handler = new Handler();
+    protected boolean isCalibratrionLogged = false;
+
 
     @Override
     public void onCreate() {
@@ -54,11 +56,18 @@ public class EarthquakeForegroundService extends Service {
         sensorDetector.startListening(new EarthquakeSensorDetector.OnVibrationDetectedListener() {
             @Override
             public void onVibrationDetected(double acceleration, float x, float y, float z) {
-                if (acceleration < 2.0) {
-                    acceleration = 0.0;
+
+                //Hindari getaran micro / noise sensor murni di bawah 0.2 m/s2 masuk perhitungan
+                if (acceleration > 0.5) {
+                    Log.i(TAG, "onVibrationDetected: Raw Accel: " + acceleration + " | x: " + x + " | y: " + y + " | z: " + z);
                 }
 
-                boolean isEarthquake = staLtaDetector.processAccelaration(acceleration);
+//                boolean isHandlingAction = (Math.abs(x) > 0.3 || Math.abs(y) > 0.3 || Math.abs(z) < 0.4);
+                if (acceleration < 2.0) {
+                    acceleration = 0.0;
+                } else {
+                    Log.i(TAG, "Lolos filter: nilai = " + acceleration);
+                }
 
                 //Monitor perubahan status kalibrasi
                 StaLtaDetector.CalibrationState currentState = staLtaDetector.getCalibrationState();
@@ -67,6 +76,12 @@ public class EarthquakeForegroundService extends Service {
                     updateNotificationBasedOnState(currentState);
                 }
 
+                if (!isCalibratrionLogged && staLtaDetector.isCalibrated()) {
+                    isCalibratrionLogged = true;
+                    Log.i(TAG, "Kalibrasi selesai! Sensor gempa siap");
+                }
+
+                boolean isEarthquake = staLtaDetector.processAccelaration(acceleration);
                 if (isEarthquake && !isCoolDown && staLtaDetector.isCalibrated()) {
                     isCoolDown = true;
                     Log.i(TAG, "Potensi gempa terdeteksi");
@@ -101,14 +116,18 @@ public class EarthquakeForegroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             String action = intent.getAction();
-            if (ACTION_STOP.equals(action)) {
+
+            if (EarthquakeForegroundService.ACTION_START.equals(action)) {
+                startForeground(NOTIFICATION_ID_FOREGROUND, createNotification("Memulai Kalibrasi Sensor..."));
+            } else if (EarthquakeForegroundService.ACTION_STOP.equals(action)) {
+                if (sensorDetector != null) {
+                    sensorDetector.stopListening();
+                }
+
                 stopForeground(true);
                 stopSelf();
-                return START_NOT_STICKY;
             }
         }
-
-        startForeground(NOTIFICATION_ID_FOREGROUND, createNotification("Memulai Kalibrasi Sensor..."));
         return START_STICKY;
     }
 
