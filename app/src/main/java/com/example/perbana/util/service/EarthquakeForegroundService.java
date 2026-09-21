@@ -12,10 +12,12 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import com.example.perbana.MainActivity;
 import com.example.perbana.R;
 import com.example.perbana.presentation.system_info.SystemInformationActivity;
 import com.example.perbana.util.AlarmPlayer;
@@ -31,18 +33,24 @@ public class EarthquakeForegroundService extends Service {
 
     private static final int NOTIFICATION_ID_FOREGROUND = 999;
     private static final String CHANNEL_ID_STATUS = "earthquake_status_channel";
+    public static final String ACTION_DISMISS_NOTIFICATION = "ACTION_DISMISS_NOTIFICATION";
 
     private EarthquakeSensorDetector sensorDetector;
     private StaLtaDetector staLtaDetector;
     private boolean isCoolDown = false;
     private StaLtaDetector.CalibrationState lastState = null;
     private Handler handler = new Handler();
-    protected boolean isCalibratrionLogged = false;
 
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        createChannelIfNeeded();
+
+        Notification initialNotif = createNotification("Belum Terkalibrasi");
+        startForeground(NOTIFICATION_ID_FOREGROUND, initialNotif);
+
         initSensor();
     }
 
@@ -56,17 +64,9 @@ public class EarthquakeForegroundService extends Service {
         sensorDetector.startListening(new EarthquakeSensorDetector.OnVibrationDetectedListener() {
             @Override
             public void onVibrationDetected(double acceleration, float x, float y, float z) {
-
-                //Hindari getaran micro / noise sensor murni di bawah 0.2 m/s2 masuk perhitungan
-                if (acceleration > 0.5) {
-                    Log.i(TAG, "onVibrationDetected: Raw Accel: " + acceleration + " | x: " + x + " | y: " + y + " | z: " + z);
-                }
-
-//                boolean isHandlingAction = (Math.abs(x) > 0.3 || Math.abs(y) > 0.3 || Math.abs(z) < 0.4);
+                //boolean isHandlingAction = (Math.abs(x) > 0.3 || Math.abs(y) > 0.3 || Math.abs(z) < 0.4);
                 if (acceleration < 2.0) {
                     acceleration = 0.0;
-                } else {
-                    Log.i(TAG, "Lolos filter: nilai = " + acceleration);
                 }
 
                 //Monitor perubahan status kalibrasi
@@ -74,11 +74,7 @@ public class EarthquakeForegroundService extends Service {
                 if (currentState != lastState) {
                     lastState = currentState;
                     updateNotificationBasedOnState(currentState);
-                }
-
-                if (!isCalibratrionLogged && staLtaDetector.isCalibrated()) {
-                    isCalibratrionLogged = true;
-                    Log.i(TAG, "Kalibrasi selesai! Sensor gempa siap");
+                    showStatusToastandLog(currentState);
                 }
 
                 boolean isEarthquake = staLtaDetector.processAccelaration(acceleration);
@@ -112,39 +108,87 @@ public class EarthquakeForegroundService extends Service {
         updateForegroundNotification(textStatus);
     }
 
+    private void showStatusToastandLog(StaLtaDetector.CalibrationState state) {
+        String message;
+        switch (state) {
+            case NOT_CALIBRATED:
+                message = "Sensor Gempa: Belum Terkalibrasi";
+                break;
+            case LOADING:
+                message = "Sensor Gempa: Sedang Memuat Kalibrasi...";
+                break;
+            case CALIBRATED:
+                message = "Sensor Gempa: Terkalibrasi (SIAGA)";
+                break;
+            default:
+                message = "Sensor Gempa: Status Berubah";
+                break;
+        }
+
+        Log.i(TAG, "showStatusToastandLog: message: " + message);
+        handler.post(() -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show());
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             String action = intent.getAction();
-
-            if (EarthquakeForegroundService.ACTION_START.equals(action)) {
-                startForeground(NOTIFICATION_ID_FOREGROUND, createNotification("Memulai Kalibrasi Sensor..."));
-            } else if (EarthquakeForegroundService.ACTION_STOP.equals(action)) {
+            if (ACTION_STOP.equals(action)) {
                 if (sensorDetector != null) {
                     sensorDetector.stopListening();
                 }
-
                 stopForeground(true);
                 stopSelf();
+            } else if (ACTION_DISMISS_NOTIFICATION.equals(action)) {
+                Notification notif = createNotification(lastState != null ? getStatusText(lastState) : "Belum Terkalibrasi");
+                startForeground(NOTIFICATION_ID_FOREGROUND, notif);
+                return START_STICKY;
             }
         }
+
+        if (sensorDetector == null) {
+            Notification initialNotif = createNotification("Belum Terkalibrasi");
+            startForeground(NOTIFICATION_ID_FOREGROUND, initialNotif);
+            initSensor();
+        }
+
         return START_STICKY;
+    }
+
+    private String getStatusText(StaLtaDetector.CalibrationState state) {
+        switch (state) {
+            case NOT_CALIBRATED: return "Belum Terkalibrasi";
+            case LOADING: return "Memuat Kalibrasi...";
+            case CALIBRATED: return "Terkalibrasi (SIAGA)";
+            default: return "Tidak Diketahui";
+        }
     }
 
     private Notification createNotification(String statusText) {
         createChannelIfNeeded();
 
-        Intent notificationIntent = new Intent(this, SystemInformationActivity.class);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        return new NotificationCompat.Builder(this, CHANNEL_ID_STATUS)
+        Intent deleteIntent = new Intent(this, EarthquakeForegroundService.class);
+        deleteIntent.setAction(ACTION_DISMISS_NOTIFICATION);
+        PendingIntent deletePendingIntent = PendingIntent.getService(this, 0, deleteIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID_STATUS)
                 .setSmallIcon(R.drawable.warning)
                 .setContentTitle("Status Monitor Gempa")
                 .setContentText("Kondisi: " + statusText)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setOngoing(true)
+                .setAutoCancel(false)
                 .setContentIntent(pendingIntent)
-                .build();
+                .setDeleteIntent(deletePendingIntent);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            builder.setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE);
+        }
+
+        return builder.build();
     }
 
     private void updateForegroundNotification(String statusText) {

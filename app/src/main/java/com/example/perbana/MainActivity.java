@@ -127,6 +127,7 @@ public class MainActivity extends BaseActivity {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !notificationGranted) {
                     Toast.makeText(this, "Izinkan notifikasi untuk peringatan gempa", Toast.LENGTH_SHORT).show();
                 }
+                startEarthquakeServiceIfNeeded();
             });
 
     //List untuk menampung data kode daerah;
@@ -181,21 +182,11 @@ public class MainActivity extends BaseActivity {
             return insets;
         });
 
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         pref = new PerbanaPreferences(MainActivity.this);
 
-        if (!pref.getInitiateEarthquakeSensor()) {
-            Intent intent = new Intent(MainActivity.this, EarthquakeForegroundService.class);
-            intent.setAction(EarthquakeForegroundService.ACTION_START);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intent);
-            } else {
-                startService(intent);
-            }
-
-            pref.setInitiateEarthquakeSensor(true);
-        }
+        checkAllPermission();
 
         // Untuk membaca data kode wilayah
         csvReader = new CsvReader(getResources().openRawResource(R.raw.kode_wilayah));
@@ -206,10 +197,6 @@ public class MainActivity extends BaseActivity {
         initRepository();
         initView();
         initLaunched(false);
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
-        checkAllPermission();
 
         main.setOnRefreshListener(() -> {
             initLaunched(true);
@@ -372,6 +359,20 @@ public class MainActivity extends BaseActivity {
             permissionLauncher.launch(permissionToRequest.toArray(new String[0]));
         } else {
             getCurrentLocation();
+            startEarthquakeServiceIfNeeded();
+        }
+    }
+
+    private void startEarthquakeServiceIfNeeded() {
+        if (!pref.getInitiateEarthquakeSensor()) {
+            Intent intent = new Intent(MainActivity.this, EarthquakeForegroundService.class);
+            intent.setAction(EarthquakeForegroundService.ACTION_START);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent);
+            } else {
+                startService(intent);
+            }
+            pref.setInitiateEarthquakeSensor(true);
         }
     }
 

@@ -3,9 +3,15 @@ package com.example.perbana.presentation.system_info;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -15,6 +21,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -26,7 +33,9 @@ import com.example.perbana.BuildConfig;
 import com.example.perbana.MainActivity;
 import com.example.perbana.R;
 import com.example.perbana.db.local.PerbanaPreferences;
+import com.example.perbana.util.AlarmPlayer;
 import com.example.perbana.util.AppConstants;
+import com.example.perbana.util.receiver.DismissAlarmReceiver;
 import com.example.perbana.util.service.EarthquakeForegroundService;
 import com.example.perbana.util.worker.EarthquakeWorker;
 import com.google.android.material.button.MaterialButton;
@@ -42,10 +51,6 @@ public class SystemInformationActivity extends BaseActivity {
     private SwitchCompat switchEarthquakeSensor = null;
 
     //Variabel
-//    private EarthquakeSensorDetector sensorDetector;
-//    private StaLtaDetector staLtaDetector;
-//    private boolean isCooldown = false;
-//    private boolean hasShownCalibrationTest = false;
     private PerbanaPreferences pref;
 
     @Override
@@ -62,8 +67,6 @@ public class SystemInformationActivity extends BaseActivity {
         pref = new PerbanaPreferences(SystemInformationActivity.this);
 
         initView();
-
-        setupSensoring();
 
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
@@ -132,6 +135,52 @@ public class SystemInformationActivity extends BaseActivity {
                 }
             }
         });
+    }
+
+    private void triggerNotification() {
+        Log.i(TAG, "triggerNotification: Start trigger");
+        NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+
+        AlarmPlayer.startAlarm(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationManager.deleteNotificationChannel(EarthquakeWorker.CHANNEL_ID_EARTHQUAKE);
+            NotificationChannel channel = new NotificationChannel(
+                    EarthquakeWorker.CHANNEL_ID_EARTHQUAKE,
+                    "Peringatan Gempa Terdekat",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+
+            channel.enableVibration(true);
+            channel.setVibrationPattern(new long[]{0, 500, 200, 500});
+            channel.setSound(null, null);
+
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+
+        int notificationId = (int) System.currentTimeMillis();
+
+        Intent dismissIntent = new Intent(this, DismissAlarmReceiver.class);
+        dismissIntent.putExtra("NOTIFICATION_ID", notificationId);
+        PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(this, notificationId, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext() , EarthquakeWorker.CHANNEL_ID_EARTHQUAKE)
+                .setSmallIcon(R.drawable.warning)
+                .setContentTitle("UJI COBA ALARM GEMPA")
+                .setContentText("Pengujian sirine bahaya dan notifikasi berhasil")
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setSound(null)
+                .setColor(Color.RED)
+                .setColorized(true)
+                .setOngoing(true)
+                .setAutoCancel(false)
+                .addAction(R.drawable.warning, "MATIKAN ALARM", dismissPendingIntent);
+
+        if (notificationManager != null) {
+            notificationManager.notify(notificationId, builder.build());
+        }
     }
 
     @Override
