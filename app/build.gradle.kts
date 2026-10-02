@@ -26,13 +26,18 @@ android {
 
     buildTypes {
         debug {
-            versionNameSuffix = "-debug"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            buildConfigField("Boolean", "ENABLE_UPDATE_CHECK", "false")
+            buildConfigField("String", "GITHUB_RELEASE_URL", "\"https://api.github.com/repos/RandyNasuta/Perbana/releases/latest\"")
             buildConfigField("String", "ENVIRONMENT", "\"Development\"")
         }
         release {
             isMinifyEnabled = false
             proguardFiles (getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro")
+            buildConfigField("Boolean", "ENABLE_UPDATE_CHECK", "true")
+            buildConfigField("String", "GITHUB_RELEASE_URL", "\"https://api.github.com/repos/RandyNasuta/Perbana/releases/latest\"")
             buildConfigField("String", "ENVIRONMENT", "\"Production\"")
         }
     }
