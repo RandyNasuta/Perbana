@@ -3,6 +3,7 @@ package com.example.perbana.presentation.weather.weather_warning_list;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.example.perbana.BaseActivity;
 import com.example.perbana.MainActivity;
 import com.example.perbana.R;
@@ -47,7 +49,9 @@ public class WeatherWarningListActivity extends BaseActivity {
     //View Group
     private RecyclerView rvWeatherWarningList = null;
     private TextView tvWeatherWarningLastDate = null;
-    private SwipeRefreshLayout main = null;
+    private FrameLayout main = null;
+    private SwipeRefreshLayout srlWeatherWarningList = null;
+    private LottieAnimationView lottieBackground = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,9 +80,9 @@ public class WeatherWarningListActivity extends BaseActivity {
 
         tvWeatherWarningLastDate.setText("Waktu pemutakhiran data: " + DateUtil.weatherWarningDate(lastBuildDate));
 
-        main.setOnRefreshListener(() -> {
+        srlWeatherWarningList.setOnRefreshListener(() -> {
             getWeatherWarningList();
-            main.setRefreshing(false);
+            srlWeatherWarningList.setRefreshing(false);
         });
     }
 
@@ -88,6 +92,9 @@ public class WeatherWarningListActivity extends BaseActivity {
         tvWeatherWarningLastDate = findViewById(R.id.tv_weather_warning_last_date);
         main = findViewById(R.id.main);
         main.setBackgroundResource(AppConstants.weatherBackgroundResource);
+        srlWeatherWarningList = findViewById(R.id.srl_weather_warning_list);
+        lottieBackground = findViewById(R.id.lottie_background);
+        lottieBackground.setAnimation(AppConstants.weatherBackgroundAnimationResource);
 
         adapter = new WeatherWarningAdapter(weatherWarningList, WeatherWarningListActivity.this);
         rvWeatherWarningList.setAdapter(adapter);

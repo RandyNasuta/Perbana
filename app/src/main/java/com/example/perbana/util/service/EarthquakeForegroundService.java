@@ -19,7 +19,6 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.perbana.MainActivity;
 import com.example.perbana.R;
-import com.example.perbana.presentation.system_info.SystemInformationActivity;
 import com.example.perbana.util.AlarmPlayer;
 import com.example.perbana.util.earthquake.EarthquakeSensorDetector;
 import com.example.perbana.util.earthquake.StaLtaDetector;
@@ -77,7 +76,7 @@ public class EarthquakeForegroundService extends Service {
                     showStatusToastandLog(currentState);
                 }
 
-                boolean isEarthquake = staLtaDetector.processAccelaration(acceleration);
+                boolean isEarthquake = staLtaDetector.processAcceleration(acceleration);
                 if (isEarthquake && !isCoolDown && staLtaDetector.isCalibrated()) {
                     isCoolDown = true;
                     Log.i(TAG, "Potensi gempa terdeteksi");
@@ -220,7 +219,7 @@ public class EarthquakeForegroundService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel alertChannel = new NotificationChannel(
                     EarthquakeWorker.CHANNEL_ID_EARTHQUAKE,
-                    "Peringatan Gempa Darurat",
+                    "Peringatan Gempa dan Bencana",
                     NotificationManager.IMPORTANCE_HIGH
             );
             alertChannel.enableVibration(true);

@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -65,6 +66,7 @@ public class EarthquakeListActivity extends BaseActivity {
 
     //View
     private SwipeRefreshLayout main = null;
+    private LottieAnimationView lottiBackground = null;
 
     //View group Earthquake
     private LinearLayout llHeaderEarthquakeList;
@@ -144,6 +146,7 @@ public class EarthquakeListActivity extends BaseActivity {
     @Override
     protected void initView(){
         main = findViewById(R.id.main);
+        lottiBackground = findViewById(R.id.lottie_background);
         llHeaderEarthquakeList = findViewById(R.id.ll_header_earthquake_list);
         llExpandableEarthquakeList = findViewById(R.id.layout_expandable_earthquake_list);
         ivArrowEarthquakeList = findViewById(R.id.iv_arrow_earthquake_list);
@@ -153,6 +156,7 @@ public class EarthquakeListActivity extends BaseActivity {
         rvEarthquake.setAdapter(earthquakeAdapter);
 
         main.setBackgroundResource(AppConstants.weatherBackgroundResource);
+        lottiBackground.setAnimation(AppConstants.weatherBackgroundAnimationResource);
 
         llHeaderEarthquakeListFelt = findViewById(R.id.ll_header_earthquake_list_felt);
         llExpandableEarthquakeListFelt = findViewById(R.id.layout_expandable_earthquake_list_felt);

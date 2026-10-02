@@ -104,10 +104,10 @@ public class EarthquakeWorker extends Worker {
         AlarmPlayer.startAlarm(getApplicationContext());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationManager.deleteNotificationChannel(EarthquakeWorker.CHANNEL_ID_EARTHQUAKE);
+//            notificationManager.deleteNotificationChannel(EarthquakeWorker.CHANNEL_ID_EARTHQUAKE);
             NotificationChannel channel = new NotificationChannel(
                     EarthquakeWorker.CHANNEL_ID_EARTHQUAKE,
-                    "Peringatan Gempa Terdekat",
+                    "Peringatan Gempa dan Bencana",
                     NotificationManager.IMPORTANCE_HIGH
             );
 

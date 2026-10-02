@@ -62,6 +62,6 @@ public class PerbanaPreferences {
     }
 
     public boolean getInitiateEarthquakeSensor() {
-        return pref.getBoolean(KEY_INITIATE_EARTHQUAKE_SENSOR, false);
+        return pref.getBoolean(KEY_INITIATE_EARTHQUAKE_SENSOR, true);
     }
 }

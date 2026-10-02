@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -9,31 +9,46 @@
     android:background="@drawable/bg_weather_sunny"
     tools:context=".presentation.weather.weather_warning_list.WeatherWarningListActivity">
 
-    <LinearLayout
-        android:id="@+id/ll_main"
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lottie_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        app:lottie_rawRes="@raw/rain"
+        android:scaleType="centerCrop"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"/>
 
-        <TextView
-            android:id="@+id/tv_weather_warning_last_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:layout_gravity="center_horizontal"
-            android:text="Waktu pemutakhiran data: Fri, 14 Aug 2026 02:30:10 +0000"
-            android:textColor="@color/white"
-            android:background="@drawable/bg_badge_soft"
-            android:textStyle="bold"
-            android:layout_marginTop="12dp"
-            android:textSize="@dimen/text_size_body_medium"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_weather_warning_list"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/srl_weather_warning_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:id="@+id/ll_main"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="12dp"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tv_weather_warning_last_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:layout_gravity="center_horizontal"
+                android:text="Waktu pemutakhiran data: Fri, 14 Aug 2026 02:30:10 +0000"
+                android:textColor="@color/white"
+                android:background="@drawable/bg_badge_soft"
+                android:textStyle="bold"
+                android:layout_marginTop="12dp"
+                android:textSize="@dimen/text_size_body_medium"/>
 
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_weather_warning_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="12dp"/>
+
+        </LinearLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
+</FrameLayout>

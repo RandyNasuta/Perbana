@@ -16,6 +16,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.widget.NestedScrollView;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -49,6 +50,9 @@ public class EarthquakeDetailActivity extends BaseActivity {
     private TextView tvDetailLatitudeLongitude = null;
     private TextView tvDetailFelt = null;
     private LinearLayout llDirasakanContainer = null;
+    private NestedScrollView main = null;
+    private LottieAnimationView lottieBackground = null;
+
 
 
     @Override
@@ -82,6 +86,11 @@ public class EarthquakeDetailActivity extends BaseActivity {
         tvDetailLatitudeLongitude = findViewById(R.id.tv_detail_latitude_longitude);
         tvDetailFelt = findViewById(R.id.tv_detail_felt);
         llDirasakanContainer = findViewById(R.id.ll_dirasakan_container);
+        main = findViewById(R.id.main);
+        main.setBackgroundResource(AppConstants.weatherBackgroundResource);
+        lottieBackground = findViewById(R.id.lottie_background);
+        lottieBackground.setAnimation(AppConstants.weatherBackgroundAnimationResource);
+
 
         Glide.with(EarthquakeDetailActivity.this)
                 .load("https://static.bmkg.go.id/" + autoEarthquake.getShakemap())

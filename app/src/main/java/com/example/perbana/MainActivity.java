@@ -4,6 +4,8 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,6 +21,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -43,6 +46,7 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
@@ -139,7 +143,7 @@ public class MainActivity extends BaseActivity {
 
     //View
     private SwipeRefreshLayout main = null;
-    private LinearLayout llMain = null;
+    private FrameLayout flMain = null;
     private LinearLayout llProgress = null;
     private RecyclerView rvMainWeather;
     private TextView tvLocation;
@@ -150,7 +154,7 @@ public class MainActivity extends BaseActivity {
     private TextInputLayout tilProvince = null;
     private TextInputLayout tilRegency = null;
     private TextInputLayout tilSubdistrict = null;
-    private TextInputLayout tilVilage = null;
+    private TextInputLayout tilVillage = null;
     private ProgressBar pbMain = null;
     private ImageView ivCurrentWeather = null;
     private MaterialCardView cardWeatherList = null;
@@ -170,6 +174,7 @@ public class MainActivity extends BaseActivity {
     private LinearLayout llMainRegionNotChoosen = null;
     private LinearLayout llMainRegionWeather = null;
     private ImageButton btnInformation = null;
+    private LottieAnimationView lottieBackground = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,9 +187,10 @@ public class MainActivity extends BaseActivity {
             return insets;
         });
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
         pref = new PerbanaPreferences(MainActivity.this);
+        createNotificationChannel();
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         checkAllPermission();
 
@@ -218,7 +224,7 @@ public class MainActivity extends BaseActivity {
             tilProvince = dialogView.findViewById(R.id.tilProvince);
             tilRegency = dialogView.findViewById(R.id.tilRegency);
             tilSubdistrict = dialogView.findViewById(R.id.tilSubdistrict);
-            tilVilage = dialogView.findViewById(R.id.tilVilage);
+            tilVillage = dialogView.findViewById(R.id.tilVillage);
 
             provinceRegionList = new ArrayList<>();
             regencyRegionList = new ArrayList<>();
@@ -243,7 +249,7 @@ public class MainActivity extends BaseActivity {
                     tilRegency.setVisibility(VISIBLE);
 
                     tilSubdistrict.setVisibility(GONE); //Reset ke gone
-                    tilVilage.setVisibility(GONE);
+                    tilVillage.setVisibility(GONE);
 
                     regencyRegionList.clear();
                     subDistrictRegionList.clear();
@@ -268,7 +274,7 @@ public class MainActivity extends BaseActivity {
                     autoSubdistrict.dismissDropDown();
                     tilSubdistrict.setVisibility(VISIBLE);
 
-                    tilVilage.setVisibility(GONE); //Reset ke gone
+                    tilVillage.setVisibility(GONE); //Reset ke gone
 
                     subDistrictRegionList.clear();
                     villageRegionList.clear();
@@ -290,7 +296,7 @@ public class MainActivity extends BaseActivity {
                     autoVillage.setText("Desa/Kelurahan");
                     autoVillage.clearListSelection();
                     autoVillage.dismissDropDown();
-                    tilVilage.setVisibility(VISIBLE);
+                    tilVillage.setVisibility(VISIBLE);
 
                     villageRegionList.clear();
 
@@ -338,6 +344,27 @@ public class MainActivity extends BaseActivity {
         });
     }
 
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+
+            if (notificationManager != null) {
+                NotificationChannel channel = new NotificationChannel(
+                        EarthquakeWorker.CHANNEL_ID_EARTHQUAKE,
+                        "Peringatan Gempa dan Bencana",
+                        NotificationManager.IMPORTANCE_HIGH
+                );
+
+                channel.setDescription("Kanal utama peringatan gempa");
+                channel.enableVibration(true);
+                channel.setVibrationPattern(new long[]{0, 500, 200, 500});
+//                channel.setSound(null, null);
+
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+    }
+
     private void checkAllPermission() {
         List<String> permissionToRequest = new ArrayList<>();
 
@@ -364,7 +391,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void startEarthquakeServiceIfNeeded() {
-        if (!pref.getInitiateEarthquakeSensor()) {
+        if (pref.getInitiateEarthquakeSensor()) {
             Intent intent = new Intent(MainActivity.this, EarthquakeForegroundService.class);
             intent.setAction(EarthquakeForegroundService.ACTION_START);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -372,7 +399,6 @@ public class MainActivity extends BaseActivity {
             } else {
                 startService(intent);
             }
-            pref.setInitiateEarthquakeSensor(true);
         }
     }
 
@@ -414,7 +440,7 @@ public class MainActivity extends BaseActivity {
 
     private void currentChoosenRegion(String choosenRegion) {
         //Tampilkan progress bar
-        llMain.setVisibility(GONE);
+        flMain.setVisibility(GONE);
         llProgress.setVisibility(VISIBLE);
 
         //Ambil data dari API
@@ -459,15 +485,22 @@ public class MainActivity extends BaseActivity {
                             .transition(DrawableTransitionOptions.withCrossFade())
                             .into(ivCurrentWeather);
 
+                    lottieBackground.playAnimation();
                     if (cuacaCurrent.get("weather").getAsInt() == 0 || cuacaCurrent.get("weather").getAsInt() == 1) {
                         main.setBackgroundResource(R.drawable.bg_weather_sunny);
                         AppConstants.weatherBackgroundResource = R.drawable.bg_weather_sunny;
+                        AppConstants.weatherBackgroundAnimationResource = R.raw.sunny;
+                        lottieBackground.setAnimation(R.raw.sunny);
                     } else if (cuacaCurrent.get("weather").getAsInt() == 2) {
                         main.setBackgroundResource(R.drawable.bg_weather_cloudy);
                         AppConstants.weatherBackgroundResource = R.drawable.bg_weather_cloudy;
+                        AppConstants.weatherBackgroundAnimationResource = R.raw.cloud;
+                        lottieBackground.setAnimation(R.raw.cloud);
                     } else {
                         main.setBackgroundResource(R.drawable.bg_weather_rainy);
                         AppConstants.weatherBackgroundResource = R.drawable.bg_weather_rainy;
+                        AppConstants.weatherBackgroundAnimationResource = R.raw.rain;
+                        lottieBackground.setAnimation(R.raw.rain);
                     }
 
                     JsonArray cuacaArray = data.getAsJsonArray("cuaca");
@@ -498,7 +531,7 @@ public class MainActivity extends BaseActivity {
                 }
 
                 //Tutup Progress Bar
-                llMain.setVisibility(VISIBLE);
+                flMain.setVisibility(VISIBLE);
                 llProgress.setVisibility(GONE);
 
                 llMainRegionNotChoosen.setVisibility(GONE);
@@ -635,7 +668,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void initView() {
         main = findViewById(R.id.main);
-        llMain = findViewById(R.id.ll_main);
+        flMain = findViewById(R.id.fl_main);
         rvMainWeather = findViewById(R.id.rv_main_weather);
         tvLocation = findViewById(R.id.tv_location);
         tvMainCurrentPlace = findViewById(R.id.tv_main_current_place);
@@ -658,6 +691,7 @@ public class MainActivity extends BaseActivity {
         llMainRegionNotChoosen = findViewById(R.id.ll_main_region_not_choosen);
         llMainRegionWeather = findViewById(R.id.ll_main_region_weather);
         btnInformation = findViewById(R.id.btn_information);
+        lottieBackground = findViewById(R.id.lottie_background);
 
         //Recycler View Weather
         weatherAdapter = new WeatherAdapter(new ArrayList<Weather>());

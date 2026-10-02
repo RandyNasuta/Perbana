@@ -14,6 +14,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -51,6 +52,7 @@ public class WeatherWarningDetailActivity extends BaseActivity {
     private TextView tvDetailDescription = null, tvDetailIdentifier = null, tvDetailSender = null;
     private TextView tvDetailSenderName = null, tvDetailArea = null;
     private ScrollView main = null;
+    private LottieAnimationView lottieBackground = null;
 
 
     @Override
@@ -144,6 +146,7 @@ public class WeatherWarningDetailActivity extends BaseActivity {
     @Override
     protected void initView() {
         main = findViewById(R.id.main);
+        lottieBackground = findViewById(R.id.lottie_background);
         ivDetailInfographic = findViewById(R.id.iv_detail_infographic);
         tvDetailEvent = findViewById(R.id.tv_detail_event);
         tvDetailStatus = findViewById(R.id.tv_detail_status);
@@ -158,5 +161,6 @@ public class WeatherWarningDetailActivity extends BaseActivity {
         tvDetailSenderName = findViewById(R.id.tv_detail_sender_name);
         tvDetailArea = findViewById(R.id.tv_detail_area);
         main.setBackgroundResource(AppConstants.weatherBackgroundResource);
+        lottieBackground.setAnimation(AppConstants.weatherBackgroundAnimationResource);
     }
 }

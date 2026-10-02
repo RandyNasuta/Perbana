@@ -15,12 +15,21 @@
         android:paddingBottom="80dp">
 
         <FrameLayout
-            android:paddingHorizontal="24dp"
+            android:id="@+id/fl_main"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/lottie_background"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:lottie_rawRes="@raw/rain"
+                android:scaleType="centerCrop"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"/>
+
             <LinearLayout
-                android:id="@+id/ll_main"
+                android:paddingHorizontal="24dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"

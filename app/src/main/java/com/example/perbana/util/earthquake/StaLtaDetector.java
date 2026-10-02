@@ -58,19 +58,19 @@ public class StaLtaDetector {
         }
     }
 
-    public boolean processAccelaration(double acceleration) {
+    public boolean processAcceleration(double acceleration) {
         //Linear Acceleration sudah tanpa gravitasi, kita ambil nilai absol utnya
         double val = Math.abs(acceleration);
 
         //Filter melempar hp
-        if (!isCalibrated && val > 2.5) {
-            resetDetector();
-            return false;
-        }
+//        if (!isCalibrated && val > 2.5) {
+//            resetDetector();
+//            return false;
+//        }
 
         //Reset detector ketika ada hantaman instan yang ekstrem
         if (val > 14.0) {
-            resetDetector();
+            consecutiveTriggerCount = 0;
             return false;
         }
 
@@ -96,19 +96,17 @@ public class StaLtaDetector {
 
         //ratio saat ini
         double ratio = sta / lta;
-
+        double minStaThreshold = 0.6;
         boolean isSpiking = false;
-        if (ratio >= triggerThreshold) {
+
+        if (ratio >= triggerThreshold && (sta >= minStaThreshold)) {
             isSpiking = true;
         }
 
-        if (!isSpiking || !isCalibrated) {
-            //Batas nilai ekstrem yang masuk ke LTA
-            double ltaVal = Math.min(val, 3.0);
-
+        if (!isSpiking && val < 0.8) {
             // Hitung Moving Average untuk LTA
-            ltaQueue.add(ltaVal);
-            ltaSum += ltaVal;
+            ltaQueue.add(val);
+            ltaSum += val;
             if (ltaQueue.size() > ltaWindowSize) {
                 ltaSum -= ltaQueue.poll();
             }
@@ -128,13 +126,14 @@ public class StaLtaDetector {
         if (isSpiking) {
             consecutiveTriggerCount++;
         } else {
-            consecutiveTriggerCount = 0;
+            if (consecutiveTriggerCount > 0) {
+                consecutiveTriggerCount = Math.max(0, consecutiveTriggerCount - 3);
+            }
         }
 
         //Validasi gempa terdeteksi
         if (consecutiveTriggerCount >= requiredConsecutiveTriggers) {
             consecutiveTriggerCount = 0;
-            resetDetector();
             return true;
         }
 

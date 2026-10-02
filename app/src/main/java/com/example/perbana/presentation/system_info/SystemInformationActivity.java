@@ -28,6 +28,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.example.perbana.BaseActivity;
 import com.example.perbana.BuildConfig;
 import com.example.perbana.MainActivity;
@@ -49,6 +50,7 @@ public class SystemInformationActivity extends BaseActivity {
     private MaterialButton btnForceSync = null;
     private ScrollView main = null;
     private SwitchCompat switchEarthquakeSensor = null;
+    private LottieAnimationView lottieBackground = null;
 
     //Variabel
     private PerbanaPreferences pref;
@@ -88,6 +90,8 @@ public class SystemInformationActivity extends BaseActivity {
         switchEarthquakeSensor = findViewById(R.id.switch_earthquake_sensor);
         main = findViewById(R.id.main);
         main.setBackgroundResource(AppConstants.weatherBackgroundResource);
+        lottieBackground = findViewById(R.id.lottie_background);
+        lottieBackground.setAnimation(AppConstants.weatherBackgroundAnimationResource);
 
         String appVersion = BuildConfig.VERSION_NAME;
         String environment = BuildConfig.ENVIRONMENT;
@@ -141,24 +145,20 @@ public class SystemInformationActivity extends BaseActivity {
         Log.i(TAG, "triggerNotification: Start trigger");
         NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
 
-        AlarmPlayer.startAlarm(this);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationManager.deleteNotificationChannel(EarthquakeWorker.CHANNEL_ID_EARTHQUAKE);
-            NotificationChannel channel = new NotificationChannel(
-                    EarthquakeWorker.CHANNEL_ID_EARTHQUAKE,
-                    "Peringatan Gempa Terdekat",
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-
-            channel.enableVibration(true);
-            channel.setVibrationPattern(new long[]{0, 500, 200, 500});
-            channel.setSound(null, null);
-
-            if (notificationManager != null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationManager != null) {
+            if (notificationManager.getNotificationChannel(EarthquakeWorker.CHANNEL_ID_EARTHQUAKE) == null) {
+                NotificationChannel channel = new NotificationChannel(
+                        EarthquakeWorker.CHANNEL_ID_EARTHQUAKE,
+                        "Peringatan Gempa dan Bencana",
+                        NotificationManager.IMPORTANCE_HIGH
+                );
+                channel.enableVibration(true);
+                channel.setVibrationPattern(new long[]{0, 500, 200, 500});
                 notificationManager.createNotificationChannel(channel);
             }
         }
+
+        AlarmPlayer.startAlarm(this);
 
         int notificationId = (int) System.currentTimeMillis();
 
@@ -186,8 +186,5 @@ public class SystemInformationActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (sensorDetector != null) {
-            sensorDetector.stopListening();
-        }
     }
 }

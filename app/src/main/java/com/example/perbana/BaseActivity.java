@@ -25,7 +25,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected final String TAG = getClass().getSimpleName();
 
     protected EarthquakeSensorDetector sensorDetector;
-    protected StaLtaDetector staLtaDetector;
 
 
     @Override
