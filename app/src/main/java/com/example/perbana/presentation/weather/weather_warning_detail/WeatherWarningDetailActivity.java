@@ -161,6 +161,10 @@ public class WeatherWarningDetailActivity extends BaseActivity {
         tvDetailSenderName = findViewById(R.id.tv_detail_sender_name);
         tvDetailArea = findViewById(R.id.tv_detail_area);
         main.setBackgroundResource(AppConstants.weatherBackgroundResource);
-        lottieBackground.setAnimation(AppConstants.weatherBackgroundAnimationResource);
+        if (AppConstants.weatherBackgroundAnimationResource != 0) {
+            lottieBackground.setAnimation(AppConstants.weatherBackgroundAnimationResource);
+        } else {
+            lottieBackground.clearAnimation();
+        }
     }
 }

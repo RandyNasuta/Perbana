@@ -91,7 +91,11 @@ public class SystemInformationActivity extends BaseActivity {
         main = findViewById(R.id.main);
         main.setBackgroundResource(AppConstants.weatherBackgroundResource);
         lottieBackground = findViewById(R.id.lottie_background);
-        lottieBackground.setAnimation(AppConstants.weatherBackgroundAnimationResource);
+        if (AppConstants.weatherBackgroundAnimationResource != 0) {
+            lottieBackground.setAnimation(AppConstants.weatherBackgroundAnimationResource);
+        } else {
+            lottieBackground.clearAnimation();
+        }
 
         String appVersion = BuildConfig.VERSION_NAME;
         String environment = BuildConfig.ENVIRONMENT;

@@ -486,6 +486,26 @@ public class MainActivity extends BaseActivity {
                             .into(ivCurrentWeather);
 
                     lottieBackground.playAnimation();
+
+                    Log.i(TAG, "Waktu saat ini: " + DateUtil.getCurrentTime());
+
+                    if (DateUtil.getCurrentTime().compareTo("18:00:00") >= 0 || DateUtil.getCurrentTime().compareTo("06:00:00") < 0) {
+                        //Waktu malam (jam 18 - 6)
+                        main.setBackgroundResource(R.drawable.bg_weather_rainy);
+                        AppConstants.weatherBackgroundResource = R.drawable.bg_weather_rainy;
+
+                        if (cuacaCurrent.get("weather").getAsInt() == 0 || cuacaCurrent.get("weather").getAsInt() == 1) {
+                            AppConstants.weatherBackgroundAnimationResource = 0;
+                            lottieBackground.clearAnimation();
+                        } else if (cuacaCurrent.get("weather").getAsInt() == 2) {
+                            AppConstants.weatherBackgroundAnimationResource = R.raw.cloud;
+                            lottieBackground.setAnimation(R.raw.cloud);
+                        } else {
+                            AppConstants.weatherBackgroundAnimationResource = R.raw.rain;
+                            lottieBackground.setAnimation(R.raw.rain);
+                        }
+                    }
+
                     if (cuacaCurrent.get("weather").getAsInt() == 0 || cuacaCurrent.get("weather").getAsInt() == 1) {
                         main.setBackgroundResource(R.drawable.bg_weather_sunny);
                         AppConstants.weatherBackgroundResource = R.drawable.bg_weather_sunny;

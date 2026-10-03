@@ -3,12 +3,10 @@ package com.example.perbana.presentation.earthquake.earthquake_list;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
@@ -16,26 +14,15 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.airbnb.lottie.LottieAnimationView;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.example.perbana.BaseActivity;
-import com.example.perbana.MainActivity;
 import com.example.perbana.R;
 import com.example.perbana.adapter.EarthquakeAdapter;
 import com.example.perbana.adapter.EarthquakeFeltAdapter;
@@ -66,7 +53,7 @@ public class EarthquakeListActivity extends BaseActivity {
 
     //View
     private SwipeRefreshLayout main = null;
-    private LottieAnimationView lottiBackground = null;
+    private LottieAnimationView lottieBackground = null;
 
     //View group Earthquake
     private LinearLayout llHeaderEarthquakeList;
@@ -146,7 +133,7 @@ public class EarthquakeListActivity extends BaseActivity {
     @Override
     protected void initView(){
         main = findViewById(R.id.main);
-        lottiBackground = findViewById(R.id.lottie_background);
+        lottieBackground = findViewById(R.id.lottie_background);
         llHeaderEarthquakeList = findViewById(R.id.ll_header_earthquake_list);
         llExpandableEarthquakeList = findViewById(R.id.layout_expandable_earthquake_list);
         ivArrowEarthquakeList = findViewById(R.id.iv_arrow_earthquake_list);
@@ -156,7 +143,11 @@ public class EarthquakeListActivity extends BaseActivity {
         rvEarthquake.setAdapter(earthquakeAdapter);
 
         main.setBackgroundResource(AppConstants.weatherBackgroundResource);
-        lottiBackground.setAnimation(AppConstants.weatherBackgroundAnimationResource);
+        if (AppConstants.weatherBackgroundAnimationResource != 0) {
+            lottieBackground.setAnimation(AppConstants.weatherBackgroundAnimationResource);
+        } else {
+            lottieBackground.clearAnimation();
+        }
 
         llHeaderEarthquakeListFelt = findViewById(R.id.ll_header_earthquake_list_felt);
         llExpandableEarthquakeListFelt = findViewById(R.id.layout_expandable_earthquake_list_felt);

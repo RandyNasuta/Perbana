@@ -4,6 +4,8 @@ import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -49,5 +51,11 @@ public class DateUtil {
             Log.e(TAG, "weatherWarningDate: error: " + e.getMessage());
             return dateString;
         }
+    }
+
+    public static String getCurrentTime() {
+        LocalDateTime currTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        return currTime.format(formatter);
     }
 }

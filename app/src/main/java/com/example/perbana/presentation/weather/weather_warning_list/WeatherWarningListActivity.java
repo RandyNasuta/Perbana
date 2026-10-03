@@ -94,7 +94,11 @@ public class WeatherWarningListActivity extends BaseActivity {
         main.setBackgroundResource(AppConstants.weatherBackgroundResource);
         srlWeatherWarningList = findViewById(R.id.srl_weather_warning_list);
         lottieBackground = findViewById(R.id.lottie_background);
-        lottieBackground.setAnimation(AppConstants.weatherBackgroundAnimationResource);
+        if (AppConstants.weatherBackgroundAnimationResource != 0) {
+            lottieBackground.setAnimation(AppConstants.weatherBackgroundAnimationResource);
+        } else {
+            lottieBackground.clearAnimation();
+        }
 
         adapter = new WeatherWarningAdapter(weatherWarningList, WeatherWarningListActivity.this);
         rvWeatherWarningList.setAdapter(adapter);
