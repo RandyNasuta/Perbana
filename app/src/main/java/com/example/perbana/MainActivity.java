@@ -504,24 +504,26 @@ public class MainActivity extends BaseActivity {
                             AppConstants.weatherBackgroundAnimationResource = R.raw.rain;
                             lottieBackground.setAnimation(R.raw.rain);
                         }
+                    } else {
+
+                        if (cuacaCurrent.get("weather").getAsInt() == 0 || cuacaCurrent.get("weather").getAsInt() == 1) {
+                            main.setBackgroundResource(R.drawable.bg_weather_sunny);
+                            AppConstants.weatherBackgroundResource = R.drawable.bg_weather_sunny;
+                            AppConstants.weatherBackgroundAnimationResource = R.raw.sunny;
+                            lottieBackground.setAnimation(R.raw.sunny);
+                        } else if (cuacaCurrent.get("weather").getAsInt() == 2) {
+                            main.setBackgroundResource(R.drawable.bg_weather_cloudy);
+                            AppConstants.weatherBackgroundResource = R.drawable.bg_weather_cloudy;
+                            AppConstants.weatherBackgroundAnimationResource = R.raw.cloud;
+                            lottieBackground.setAnimation(R.raw.cloud);
+                        } else {
+                            main.setBackgroundResource(R.drawable.bg_weather_rainy);
+                            AppConstants.weatherBackgroundResource = R.drawable.bg_weather_rainy;
+                            AppConstants.weatherBackgroundAnimationResource = R.raw.rain;
+                            lottieBackground.setAnimation(R.raw.rain);
+                        }
                     }
 
-                    if (cuacaCurrent.get("weather").getAsInt() == 0 || cuacaCurrent.get("weather").getAsInt() == 1) {
-                        main.setBackgroundResource(R.drawable.bg_weather_sunny);
-                        AppConstants.weatherBackgroundResource = R.drawable.bg_weather_sunny;
-                        AppConstants.weatherBackgroundAnimationResource = R.raw.sunny;
-                        lottieBackground.setAnimation(R.raw.sunny);
-                    } else if (cuacaCurrent.get("weather").getAsInt() == 2) {
-                        main.setBackgroundResource(R.drawable.bg_weather_cloudy);
-                        AppConstants.weatherBackgroundResource = R.drawable.bg_weather_cloudy;
-                        AppConstants.weatherBackgroundAnimationResource = R.raw.cloud;
-                        lottieBackground.setAnimation(R.raw.cloud);
-                    } else {
-                        main.setBackgroundResource(R.drawable.bg_weather_rainy);
-                        AppConstants.weatherBackgroundResource = R.drawable.bg_weather_rainy;
-                        AppConstants.weatherBackgroundAnimationResource = R.raw.rain;
-                        lottieBackground.setAnimation(R.raw.rain);
-                    }
 
                     JsonArray cuacaArray = data.getAsJsonArray("cuaca");
 
