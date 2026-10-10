@@ -30,7 +30,7 @@
 
 |          Weather Forecast           |         Earthquake Information         |           Weather Early Warning           |
 |:-----------------------------------:|:--------------------------------------:|:-----------------------------------------:|
-| ![Weather](screenshots/alarm1.jpeg) | ![Earthquake](screenshots/alarm2.jpeg) | ![Early Warning](screenshots/alarm3.jpeg) |
+| ![Weather](screenshots/alarm1.jpeg) | ![Earthquake](screenshots/alarm2.jpeg) | ![Early Warning](screenshots/alarm3new.jpeg) |
 
 ---
 
